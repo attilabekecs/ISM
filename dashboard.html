@@ -56,60 +56,78 @@ button{
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycby09gbfqtMH3gacbnqu1xEOxLmYfzX7-bEB-U34QZXUKf1qEUEtif9s7r2xOcI8TcrPYw/exec";
 
+let brandChart;
+let typeChart;
+
 async function loadData(){
-  const res = await fetch(API_URL);
-  const data = await res.json();
-
-  document.getElementById("totalLeads").innerText = data.length;
-
-  const brandCount = {};
-  const typeCount = {};
-
-  data.forEach(row=>{
-    if(row.Brands){
-      row.Brands.split(",").forEach(b=>{
-        b = b.trim();
-        if(!b) return;
-        brandCount[b] = (brandCount[b]||0)+1;
-      });
+  try {
+    const res = await fetch(API_URL + "?t=" + new Date().getTime());
+    
+    if(!res.ok){
+      throw new Error("Network response not OK");
     }
 
-    if(row.Type){
-      typeCount[row.Type] = (typeCount[row.Type]||0)+1;
-    }
-  });
+    const data = await res.json();
 
-  new Chart(document.getElementById("brandChart"),{
-    type:"bar",
-    data:{
-      labels:Object.keys(brandCount),
-      datasets:[{
-        data:Object.values(brandCount)
-      }]
-    }
-  });
+    console.log("DATA:", data);
 
-  new Chart(document.getElementById("typeChart"),{
-    type:"pie",
-    data:{
-      labels:Object.keys(typeCount),
-      datasets:[{
-        data:Object.values(typeCount)
-      }]
+    if(!Array.isArray(data)){
+      console.log("Unexpected response:", data);
+      return;
     }
-  });
+
+    document.getElementById("totalLeads").innerText = data.length;
+
+    const brandCount = {};
+    const typeCount = {};
+
+    data.forEach(row=>{
+      if(row.Brands){
+        row.Brands.split(",").forEach(b=>{
+          b = b.trim();
+          if(!b) return;
+          brandCount[b] = (brandCount[b]||0)+1;
+        });
+      }
+
+      if(row.Type){
+        typeCount[row.Type] = (typeCount[row.Type]||0)+1;
+      }
+    });
+
+    if(brandChart) brandChart.destroy();
+    if(typeChart) typeChart.destroy();
+
+    brandChart = new Chart(document.getElementById("brandChart"),{
+      type:"bar",
+      data:{
+        labels:Object.keys(brandCount),
+        datasets:[{
+          label:"Brand Interest",
+          data:Object.values(brandCount),
+          backgroundColor:"#38bdf8"
+        }]
+      }
+    });
+
+    typeChart = new Chart(document.getElementById("typeChart"),{
+      type:"pie",
+      data:{
+        labels:Object.keys(typeCount),
+        datasets:[{
+          data:Object.values(typeCount),
+          backgroundColor:["#38bdf8","#22c55e","#f97316"]
+        }]
+      }
+    });
+
+  } catch(err){
+    console.error("Dashboard error:", err);
+    document.getElementById("totalLeads").innerText = "Error";
+  }
 }
 
-function exportExcel(){
-  const sheetID = "1hfipDugo8nIv9j8dBPo5x5RCHe9JpkF4iSigsa-vZIc";
-
-window.open(
-  `https://docs.google.com/spreadsheets/d/${sheetID}/export?format=xlsx`,
-  "_blank"
-);
-}
-
-loadData();
+document.addEventListener("DOMContentLoaded", loadData);
 </script>
 
 </body>
