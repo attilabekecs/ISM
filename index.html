@@ -258,6 +258,9 @@ button{
   <label>Email</label>
   <input type="email">
 
+  <label>Business Card Photo</label>
+<input type="file" id="cardPhoto" accept="image/*" capture="environment">
+
   <div class="buttons">
     <button class="back" onclick="prevStep()">Back</button>
     <button class="submit" onclick="submitForm()">Save Lead</button>
@@ -322,6 +325,14 @@ async function submitForm(){
   button.disabled = true;
   button.innerText = "Saving...";
 
+  const photoInput = document.getElementById("cardPhoto");
+  let base64Image = "";
+
+  if(photoInput.files.length > 0){
+    const file = photoInput.files[0];
+    base64Image = await toBase64(file);
+  }
+
   const data = {
     company: document.getElementById("company").value,
     country: document.getElementById("country").value,
@@ -329,34 +340,36 @@ async function submitForm(){
     type: document.querySelector(".toggle.active")?.textContent || "",
     brands: Array.from(document.querySelectorAll(".brand.active")).map(b=>b.textContent),
     phone: document.querySelector('input[type="tel"]').value,
-    email: document.querySelector('input[type="email"]').value
+    email: document.querySelector('input[type="email"]').value,
+    image: base64Image
   };
 
   try {
 
-    await fetch("https://script.google.com/macros/s/AKfycbx6BKz80SSLgNrpM0AC5xzb369DCJORoNhDB20iQO8Tj9kEvwOjDx2MSLtLU1jypGLZQg/exec", {
+    await fetch("https://script.google.com/macros/s/AKfycbyodG7ivhigWEdEPvgExVUdfQ4s7qBfQtaFcBDqelDyRKH14_V8EvL8MN0xKGJC_5wUUQ/exec", {
       method: "POST",
       mode: "no-cors",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
 
     button.innerText = "Saved ✓";
-    button.style.background = "#22c55e";
-
-    setTimeout(()=>{
-      location.reload();
-    },1000);
+    setTimeout(()=> location.reload(), 1000);
 
   } catch(err){
-
     button.disabled = false;
     button.innerText = "Save Lead";
     alert("Error saving lead.");
-
   }
+}
+
+function toBase64(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = ()=> resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
 }
 </script>
 
