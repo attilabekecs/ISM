@@ -316,13 +316,31 @@ function filterBrands(value){
   });
 }
 
-function submitForm(){
-  document.querySelector(".container").innerHTML = `
-    <div style="text-align:center;padding:40px">
-      <h2 style="color:#22c55e">✔ Lead Saved</h2>
-      <p style="color:#94a3b8">Ready for next partner</p>
-    </div>
-  `;
+async function submitForm(){
+  const data = {
+    company: document.getElementById("company").value,
+    country: document.getElementById("country").value,
+    contact: document.getElementById("contact").value,
+    type: document.querySelector(".toggle.active")?.textContent || "",
+    brands: Array.from(document.querySelectorAll(".brand.active")).map(b=>b.textContent),
+    phone: document.querySelector('input[type="tel"]').value,
+    email: document.querySelector('input[type="email"]').value
+  };
+
+  try {
+    await fetch("YOUR_GOOGLE_SCRIPT_URL", {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+
+    alert("Lead saved successfully!");
+  } catch(err){
+    alert("Error saving lead.");
+  }
 }
 </script>
 
