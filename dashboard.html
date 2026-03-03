@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>ISM 2026 Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{
+  font-family:Inter,sans-serif;
+  background:#0f172a;
+  color:white;
+  padding:30px;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+}
+.card{
+  background:#1e293b;
+  padding:20px;
+  border-radius:16px;
+}
+h1{margin-bottom:30px;}
+button{
+  padding:12px 20px;
+  background:#38bdf8;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  margin-top:20px;
+}
+</style>
+</head>
+<body>
+
+<h1>ISM 2026 Live Dashboard</h1>
+
+<div class="grid">
+  <div class="card">
+    <h2 id="totalLeads">0</h2>
+    <p>Total Leads</p>
+  </div>
+
+  <div class="card">
+    <canvas id="brandChart"></canvas>
+  </div>
+
+  <div class="card">
+    <canvas id="typeChart"></canvas>
+  </div>
+</div>
+
+<button onclick="exportExcel()">Download Excel</button>
+
+<script>
+const API_URL = "YOUR_GOOGLE_SCRIPT_URL";
+
+async function loadData(){
+  const res = await fetch(API_URL);
+  const data = await res.json();
+
+  document.getElementById("totalLeads").innerText = data.length;
+
+  const brandCount = {};
+  const typeCount = {};
+
+  data.forEach(row=>{
+    if(row.Brands){
+      row.Brands.split(",").forEach(b=>{
+        b = b.trim();
+        if(!b) return;
+        brandCount[b] = (brandCount[b]||0)+1;
+      });
+    }
+
+    if(row.Type){
+      typeCount[row.Type] = (typeCount[row.Type]||0)+1;
+    }
+  });
+
+  new Chart(document.getElementById("brandChart"),{
+    type:"bar",
+    data:{
+      labels:Object.keys(brandCount),
+      datasets:[{
+        data:Object.values(brandCount)
+      }]
+    }
+  });
+
+  new Chart(document.getElementById("typeChart"),{
+    type:"pie",
+    data:{
+      labels:Object.keys(typeCount),
+      datasets:[{
+        data:Object.values(typeCount)
+      }]
+    }
+  });
+}
+
+function exportExcel(){
+  const sheetID = "YOUR_SHEET_ID";
+  window.open(
+    `https://docs.google.com/spreadsheets/d/${sheetID}/export?format=xlsx`,
+    "_blank"
+  );
+}
+
+loadData();
+</script>
+
+</body>
+</html>
