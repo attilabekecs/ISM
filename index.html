@@ -317,6 +317,11 @@ function filterBrands(value){
 }
 
 async function submitForm(){
+
+  const button = document.querySelector(".submit");
+  button.disabled = true;
+  button.innerText = "Saving...";
+
   const data = {
     company: document.getElementById("company").value,
     country: document.getElementById("country").value,
@@ -328,7 +333,8 @@ async function submitForm(){
   };
 
   try {
-    await fetch("https://script.google.com/macros/s/AKfycbx6BKz80SSLgNrpM0AC5xzb369DCJORoNhDB20iQO8Tj9kEvwOjDx2MSLtLU1jypGLZQg/exec", {
+
+    await fetch("YOUR_GOOGLE_SCRIPT_URL", {
       method: "POST",
       mode: "no-cors",
       headers: {
@@ -337,9 +343,19 @@ async function submitForm(){
       body: JSON.stringify(data)
     });
 
-    alert("Lead saved successfully!");
+    button.innerText = "Saved ✓";
+    button.style.background = "#22c55e";
+
+    setTimeout(()=>{
+      location.reload();
+    },1000);
+
   } catch(err){
+
+    button.disabled = false;
+    button.innerText = "Save Lead";
     alert("Error saving lead.");
+
   }
 }
 </script>
