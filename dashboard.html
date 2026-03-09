@@ -605,7 +605,7 @@ function renderLatestLeads(filtered){
   const latestLeads = document.getElementById("latestLeads");
   latestLeads.innerHTML = "";
 
-  const latest = [...filtered].reverse().slice(0, 5);
+  const latest = [...filtered].reverse().slice(0, 3);
 
   if (!latest.length) {
     latestLeads.innerHTML = `<div class="empty">No leads match the current search.</div>`;
