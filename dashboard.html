@@ -1,226 +1,739 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ISM 2026 Dashboard</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
+:root{
+  --bg:#0f172a;
+  --card:#1e293b;
+  --card-2:#111827;
+  --text:#f8fafc;
+  --muted:#94a3b8;
+  --accent:#38bdf8;
+  --accent-soft:#0ea5e9;
+  --success:#22c55e;
+  --border:rgba(255,255,255,.06);
+  --shadow:0 20px 60px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+
 body{
-  font-family:Inter,sans-serif;
-  background:#0f172a;
-  color:white;
   margin:0;
+  font-family:Inter,sans-serif;
+  background:linear-gradient(180deg,#0b1220 0%, #0f172a 100%);
+  color:var(--text);
   padding:20px;
 }
 
-h1{
-  margin-bottom:25px;
-  font-size:1.4rem;
+.wrapper{
+  max-width:1400px;
+  margin:0 auto;
 }
 
-/* STAT GRID */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-  gap:12px;
-  margin-bottom:25px;
-}
-
-.stat-card{
-  background:#1e293b;
-  padding:16px;
-  border-radius:12px;
-  text-align:center;
-}
-
-.stat-card h2{
-  margin:0;
-  font-size:1.4rem;
-  color:#38bdf8;
-}
-
-.stat-card p{
-  margin:5px 0 0;
-  font-size:.75rem;
-  color:#94a3b8;
-}
-
-/* SECTIONS */
-.section{
-  background:#1e293b;
-  padding:16px;
-  border-radius:14px;
+.topbar{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
   margin-bottom:20px;
 }
 
-.section h3{
-  margin:0 0 12px;
+.title-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:16px;
+  flex-wrap:wrap;
+}
+
+h1{
+  margin:0;
+  font-size:1.7rem;
+  font-weight:800;
+  letter-spacing:-.02em;
+}
+
+.subtitle{
+  color:var(--muted);
+  font-size:.95rem;
+  margin-top:6px;
+}
+
+.actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+button{
+  border:none;
+  border-radius:12px;
+  padding:12px 16px;
+  font-weight:700;
+  cursor:pointer;
+  font-size:.95rem;
+  transition:.2s ease;
+}
+
+button:hover{
+  transform:translateY(-1px);
+}
+
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent-soft));
+  color:white;
+}
+
+.btn-secondary{
+  background:#334155;
+  color:white;
+}
+
+.search-wrap{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.search-wrap input{
+  flex:1;
+  min-width:240px;
+  padding:14px 16px;
+  border:none;
+  outline:none;
+  border-radius:14px;
+  background:var(--card);
+  color:var(--text);
   font-size:1rem;
+  box-shadow:var(--shadow);
+}
+
+.grid-stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:14px;
+  margin-bottom:20px;
+}
+
+.stat-card{
+  background:rgba(30,41,59,.92);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:18px;
+  box-shadow:var(--shadow);
+}
+
+.stat-label{
+  color:var(--muted);
+  font-size:.82rem;
+  margin-bottom:10px;
+}
+
+.stat-value{
+  font-size:2rem;
+  font-weight:800;
+  line-height:1;
+  color:var(--text);
+}
+
+.stat-value.accent{
+  color:var(--accent);
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:20px;
+}
+
+.left-col,
+.right-col{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
+.section{
+  background:rgba(30,41,59,.92);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:18px;
+  box-shadow:var(--shadow);
+}
+
+.section h3{
+  margin:0 0 14px;
+  font-size:1.02rem;
+}
+
+.chart-box{
+  position:relative;
+  min-height:320px;
 }
 
 .list{
   display:flex;
   flex-direction:column;
-  gap:8px;
+  gap:10px;
 }
 
 .list-item{
-  background:#0f172a;
-  padding:10px 12px;
-  border-radius:8px;
+  background:var(--card-2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.list-left{
+  min-width:0;
+}
+
+.list-title{
+  font-weight:700;
+  font-size:.95rem;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.list-sub{
+  color:var(--muted);
+  font-size:.8rem;
+  margin-top:4px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.badge{
+  min-width:36px;
+  text-align:center;
+  background:#082f49;
+  color:#7dd3fc;
+  border:1px solid rgba(56,189,248,.25);
+  padding:7px 10px;
+  border-radius:999px;
+  font-weight:700;
+  font-size:.82rem;
+}
+
+.leads-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.lead-card{
+  background:var(--card-2);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:14px;
   display:flex;
   justify-content:space-between;
-  font-size:.85rem;
+  align-items:flex-start;
+  gap:12px;
+  flex-wrap:wrap;
 }
 
-/* BUTTON */
-button{
-  width:100%;
-  padding:14px;
-  background:#38bdf8;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:600;
+.lead-main{
+  min-width:220px;
+  flex:1;
 }
 
-/* DESKTOP ENHANCEMENT */
-@media(min-width:768px){
+.lead-company{
+  font-size:1rem;
+  font-weight:800;
+  margin-bottom:4px;
+}
+
+.lead-contact{
+  color:#cbd5e1;
+  font-size:.92rem;
+  margin-bottom:6px;
+}
+
+.lead-meta{
+  color:var(--muted);
+  font-size:.8rem;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.lead-side{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:8px;
+}
+
+.type-pill{
+  padding:8px 10px;
+  border-radius:999px;
+  font-size:.8rem;
+  font-weight:700;
+  background:#1d4ed8;
+  color:white;
+}
+
+.type-pill.seller{
+  background:#7c3aed;
+}
+
+.type-pill.both{
+  background:#059669;
+}
+
+.card-link{
+  color:#7dd3fc;
+  text-decoration:none;
+  font-size:.82rem;
+  font-weight:700;
+}
+
+.card-link:hover{
+  text-decoration:underline;
+}
+
+.empty{
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.footer-note{
+  color:var(--muted);
+  font-size:.8rem;
+  margin-top:10px;
+}
+
+@media(max-width:1024px){
+  .layout{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:640px){
   body{
-    padding:40px;
+    padding:14px;
   }
 
   h1{
-    font-size:1.8rem;
+    font-size:1.35rem;
   }
 
-  .section{
-    padding:22px;
+  .stat-value{
+    font-size:1.7rem;
   }
 
-  .list{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  .chart-box{
+    min-height:260px;
+  }
+
+  .lead-side{
+    align-items:flex-start;
   }
 }
 </style>
 </head>
-
 <body>
 
-<h1>ISM 2026 Live Dashboard</h1>
+<div class="wrapper">
 
-<div class="grid">
-  <div class="stat-card">
-    <h2 id="totalLeads">0</h2>
-    <p>Total Leads</p>
+  <div class="topbar">
+    <div class="title-row">
+      <div>
+        <h1>ISM 2026 Live Dashboard</h1>
+        <div class="subtitle" id="lastUpdated">Last updated: —</div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-secondary" onclick="loadDataJSONP()">Refresh</button>
+        <button class="btn-primary" onclick="exportExcel()">Download Excel</button>
+      </div>
+    </div>
+
+    <div class="search-wrap">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Search by company, contact, country, email, phone, brand..."
+      >
+    </div>
   </div>
 
-  <div class="stat-card">
-    <h2 id="buyerCount">0</h2>
-    <p>Buyers</p>
+  <div class="grid-stats">
+    <div class="stat-card">
+      <div class="stat-label">Total Leads</div>
+      <div class="stat-value accent" id="totalLeads">0</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Buyers</div>
+      <div class="stat-value" id="buyerCount">0</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Sellers</div>
+      <div class="stat-value" id="sellerCount">0</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Both</div>
+      <div class="stat-value" id="bothCount">0</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Countries</div>
+      <div class="stat-value" id="countryTotal">0</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Brands Mentioned</div>
+      <div class="stat-value" id="brandTotal">0</div>
+    </div>
   </div>
 
-  <div class="stat-card">
-    <h2 id="sellerCount">0</h2>
-    <p>Sellers</p>
+  <div class="layout">
+    <div class="left-col">
+
+      <div class="section">
+        <h3>Latest Leads</h3>
+        <div class="leads-list" id="latestLeads"></div>
+        <div class="footer-note">Showing the latest 12 matching leads.</div>
+      </div>
+
+      <div class="section">
+        <h3>Top Brands</h3>
+        <div class="chart-box">
+          <canvas id="brandChart"></canvas>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Lead Type Distribution</h3>
+        <div class="chart-box">
+          <canvas id="typeChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="right-col">
+
+      <div class="section">
+        <h3>Top Countries</h3>
+        <div class="list" id="countryList"></div>
+      </div>
+
+      <div class="section">
+        <h3>Top Brands List</h3>
+        <div class="list" id="brandList"></div>
+      </div>
+
+    </div>
   </div>
 
-  <div class="stat-card">
-    <h2 id="bothCount">0</h2>
-    <p>Both</p>
-  </div>
 </div>
-
-<div class="section">
-  <h3>Brands</h3>
-  <div class="list" id="brandList"></div>
-</div>
-
-<div class="section">
-  <h3>Countries</h3>
-  <div class="list" id="countryList"></div>
-</div>
-
-<button onclick="exportExcel()">Download Excel</button>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbx6BKz80SSLgNrpM0AC5xzb369DCJORoNhDB20iQO8Tj9kEvwOjDx2MSLtLU1jypGLZQg/exec";
+const SHEET_ID = "1hfipDugo8nIv9j8dBPo5x5RCHe9JpkF4iSigsa-vZIc";
+
+let allData = [];
+let brandChart = null;
+let typeChart = null;
 
 function loadDataJSONP() {
+  const oldScript = document.getElementById("jsonpScript");
+  if (oldScript) oldScript.remove();
+
   const script = document.createElement("script");
-  script.src = API_URL + "?callback=handleData";
+  script.id = "jsonpScript";
+  script.src = API_URL + "?callback=handleData&_=" + Date.now();
   document.body.appendChild(script);
 }
 
 function handleData(data){
+  allData = Array.isArray(data) ? data : [];
+  updateLastUpdated();
+  renderDashboard(allData);
+}
 
-  document.getElementById("totalLeads").innerText = data.length;
+function updateLastUpdated(){
+  const now = new Date();
+  document.getElementById("lastUpdated").innerText =
+    "Last updated: " + now.toLocaleString();
+}
+
+function normalize(row){
+  return {
+    timestamp: row.Timestamp || "",
+    company: row.Company || "",
+    country: row.Country || "",
+    contact: row.Contact || "",
+    type: row.Type || "",
+    brands: row.Brands || "",
+    phone: row.Phone || "",
+    email: row.Email || "",
+    imageUrl: row["Image URL"] || ""
+  };
+}
+
+function renderDashboard(data){
+  const normalized = data.map(normalize);
+
+  const query = document.getElementById("searchInput").value.trim().toLowerCase();
+
+  const filtered = normalized.filter(row => {
+    if (!query) return true;
+
+    const haystack = [
+      row.company,
+      row.country,
+      row.contact,
+      row.type,
+      row.brands,
+      row.phone,
+      row.email
+    ].join(" ").toLowerCase();
+
+    return haystack.includes(query);
+  });
 
   const brandCount = {};
   const countryCount = {};
-  let buyer=0, seller=0, both=0;
+  let buyer = 0;
+  let seller = 0;
+  let both = 0;
 
-  data.forEach(row=>{
+  filtered.forEach(row => {
+    if (row.type === "Buyer") buyer++;
+    if (row.type === "Seller") seller++;
+    if (row.type === "Both") both++;
 
-    if(row.Type === "Buyer") buyer++;
-    if(row.Type === "Seller") seller++;
-    if(row.Type === "Both") both++;
-
-    if(row.Country){
-      countryCount[row.Country] = (countryCount[row.Country]||0)+1;
+    if (row.country) {
+      countryCount[row.country] = (countryCount[row.country] || 0) + 1;
     }
 
-    if(row.Brands){
-      row.Brands.split(",").forEach(b=>{
-        b=b.trim();
-        if(!b) return;
-        brandCount[b] = (brandCount[b]||0)+1;
+    if (row.brands) {
+      row.brands.split(",").forEach(b => {
+        const brand = b.trim();
+        if (!brand) return;
+        brandCount[brand] = (brandCount[brand] || 0) + 1;
       });
     }
   });
 
+  document.getElementById("totalLeads").innerText = filtered.length;
   document.getElementById("buyerCount").innerText = buyer;
   document.getElementById("sellerCount").innerText = seller;
   document.getElementById("bothCount").innerText = both;
+  document.getElementById("countryTotal").innerText = Object.keys(countryCount).length;
+  document.getElementById("brandTotal").innerText = Object.keys(brandCount).length;
 
+  renderBrandList(brandCount);
+  renderCountryList(countryCount);
+  renderLatestLeads(filtered);
+  renderCharts(brandCount, buyer, seller, both);
+}
+
+function renderBrandList(brandCount){
   const brandList = document.getElementById("brandList");
-  brandList.innerHTML="";
-  Object.entries(brandCount)
-    .sort((a,b)=>b[1]-a[1])
-    .forEach(([brand,count])=>{
-      brandList.innerHTML += `
-        <div class="list-item">
-          <span>${brand}</span>
-          <strong>${count}</strong>
-        </div>
-      `;
-    });
+  brandList.innerHTML = "";
 
-  const countryList = document.getElementById("countryList");
-  countryList.innerHTML="";
-  Object.entries(countryCount)
-    .sort((a,b)=>b[1]-a[1])
-    .forEach(([country,count])=>{
-      countryList.innerHTML += `
-        <div class="list-item">
-          <span>${country}</span>
-          <strong>${count}</strong>
+  const sortedBrands = Object.entries(brandCount).sort((a,b) => b[1] - a[1]).slice(0, 12);
+
+  if (!sortedBrands.length) {
+    brandList.innerHTML = `<div class="empty">No brand data found.</div>`;
+    return;
+  }
+
+  sortedBrands.forEach(([brand, count]) => {
+    brandList.innerHTML += `
+      <div class="list-item">
+        <div class="list-left">
+          <div class="list-title">${escapeHtml(brand)}</div>
+          <div class="list-sub">Brand mentions</div>
         </div>
-      `;
-    });
+        <div class="badge">${count}</div>
+      </div>
+    `;
+  });
+}
+
+function renderCountryList(countryCount){
+  const countryList = document.getElementById("countryList");
+  countryList.innerHTML = "";
+
+  const sortedCountries = Object.entries(countryCount).sort((a,b) => b[1] - a[1]).slice(0, 12);
+
+  if (!sortedCountries.length) {
+    countryList.innerHTML = `<div class="empty">No country data found.</div>`;
+    return;
+  }
+
+  sortedCountries.forEach(([country, count]) => {
+    countryList.innerHTML += `
+      <div class="list-item">
+        <div class="list-left">
+          <div class="list-title">${escapeHtml(country)}</div>
+          <div class="list-sub">Leads from this country</div>
+        </div>
+        <div class="badge">${count}</div>
+      </div>
+    `;
+  });
+}
+
+function renderLatestLeads(filtered){
+  const latestLeads = document.getElementById("latestLeads");
+  latestLeads.innerHTML = "";
+
+  const latest = [...filtered].reverse().slice(0, 12);
+
+  if (!latest.length) {
+    latestLeads.innerHTML = `<div class="empty">No leads match the current search.</div>`;
+    return;
+  }
+
+  latest.forEach(row => {
+    const pillClass =
+      row.type === "Seller" ? "type-pill seller" :
+      row.type === "Both" ? "type-pill both" :
+      "type-pill";
+
+    const metaParts = [
+      row.country,
+      row.phone,
+      row.email
+    ].filter(Boolean);
+
+    latestLeads.innerHTML += `
+      <div class="lead-card">
+        <div class="lead-main">
+          <div class="lead-company">${escapeHtml(row.company || "—")}</div>
+          <div class="lead-contact">${escapeHtml(row.contact || "No contact name")}</div>
+          <div class="lead-meta">
+            ${metaParts.map(item => `<span>${escapeHtml(item)}</span>`).join("")}
+          </div>
+          ${row.brands ? `<div class="list-sub" style="margin-top:8px;">Brands: ${escapeHtml(row.brands)}</div>` : ""}
+        </div>
+
+        <div class="lead-side">
+          <div class="${pillClass}">${escapeHtml(row.type || "—")}</div>
+          ${row.imageUrl ? `<a class="card-link" href="${escapeAttribute(row.imageUrl)}" target="_blank" rel="noopener noreferrer">Open card</a>` : ""}
+        </div>
+      </div>
+    `;
+  });
+}
+
+function renderCharts(brandCount, buyer, seller, both){
+  const topBrands = Object.entries(brandCount)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0, 8);
+
+  const brandLabels = topBrands.map(item => item[0]);
+  const brandValues = topBrands.map(item => item[1]);
+
+  if (brandChart) brandChart.destroy();
+  brandChart = new Chart(document.getElementById("brandChart"), {
+    type: "bar",
+    data: {
+      labels: brandLabels,
+      datasets: [{
+        label: "Brand Mentions",
+        data: brandValues,
+        borderWidth: 0,
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display:false }
+      },
+      scales: {
+        x: {
+          ticks: { color: "#cbd5e1" },
+          grid: { display:false }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { color: "#cbd5e1", precision:0 },
+          grid: { color: "rgba(255,255,255,.08)" }
+        }
+      }
+    }
+  });
+
+  if (typeChart) typeChart.destroy();
+  typeChart = new Chart(document.getElementById("typeChart"), {
+    type: "doughnut",
+    data: {
+      labels: ["Buyer", "Seller", "Both"],
+      datasets: [{
+        data: [buyer, seller, both],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: {
+            color: "#e2e8f0"
+          }
+        }
+      }
+    }
+  });
 }
 
 function exportExcel(){
-  const sheetID = "1hfipDugo8nIv9j8dBPo5x5RCHe9JpkF4iSigsa-vZIc";
   window.open(
-    `https://docs.google.com/spreadsheets/d/${sheetID}/export?format=xlsx`,
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=xlsx`,
     "_blank"
   );
 }
 
-document.addEventListener("DOMContentLoaded", loadDataJSONP);
+function escapeHtml(value){
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function escapeAttribute(value){
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+document.getElementById("searchInput").addEventListener("input", () => {
+  renderDashboard(allData);
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadDataJSONP();
+  setInterval(loadDataJSONP, 15000);
+});
 </script>
 
 </body>
