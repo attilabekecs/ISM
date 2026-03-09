@@ -446,7 +446,7 @@ button:hover{
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzuS2SF8Mg2lagVoGNTFIhiZwolbf-9TPWX8GPS4cgvWAkv6BY4kx-QckMcAjSqTb2OVw/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxp_L4f4dE5LghgkDdVZgABFXfTm9HFyg-F2Ogjg_fcqY8nh8CiccRuLykK8NYGsx-6OQ/exec";
 const SHEET_ID = "1hfipDugo8nIv9j8dBPo5x5RCHe9JpkF4iSigsa-vZIc";
 
 let allData = [];
@@ -482,7 +482,7 @@ function normalize(row){
     country: row.Country || "",
     contact: row.Contact || "",
     type: row.Type || "",
-    brands: row.Brands || "",
+    brands: (row.Brands && row.Brands !== "[]") ? row.Brands : "",
     phone: row.Phone || "",
     email: row.Email || "",
     imageUrl: row["Image URL"] || ""
@@ -490,7 +490,13 @@ function normalize(row){
 }
 
 function renderDashboard(data){
-  const normalized = data.map(normalize);
+  const normalized = data
+  .map(normalize)
+  .filter(row =>
+    row.company ||
+    row.contact ||
+    row.brands
+  );
 
   const query = document.getElementById("searchInput").value.trim().toLowerCase();
 
