@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <style>
 
@@ -205,10 +206,20 @@ text-align:center;
 
 <div class="container">
 
-<h1>ISM v1.0</h1>
+<h1>ISM v1.1</h1>
 
 <button id="scanButton" class="scan" onclick="startScanner()">
 📷 Scan Contact QR / vCard
+</button>
+
+<button id="cardScanButton" class="scan" onclick="scanBusinessCard()">
+📷 Scan Business Card
+</button>
+
+<input type="file" id="cardUpload" accept="image/*" capture="environment" style="display:none">
+
+<button id="closeScanner" class="scan" style="display:none">
+Close Scanner
 </button>
 
 <div id="reader"></div>
@@ -286,6 +297,8 @@ Saving...
 
 <script>
 
+let scanner
+
 let currentStep = 1
 const totalSteps = 2
 
@@ -293,9 +306,11 @@ const submitButton = document.querySelector(".submit")
 const overlay = document.getElementById("loadingOverlay")
 
 let scanButton = null
+let cardScanButton = null
 
 document.addEventListener("DOMContentLoaded", () => {
   scanButton = document.getElementById("scanButton")
+  cardScanButton = document.getElementById("cardScanButton")
 })
 
 /* STEP NAVIGATION */
@@ -311,13 +326,9 @@ currentStep++
 document.getElementById("step"+currentStep).classList.add("active")
 
 }
-
-/* scanner gomb elrejtése step2-n */
-
 if(currentStep === 2){
-
 scanButton.style.display = "none"
-
+cardScanButton.style.display = "none"
 }
 
 }
@@ -333,14 +344,15 @@ currentStep--
 document.getElementById("step"+currentStep).classList.add("active")
 
 }
-
 /* scanner gomb visszahozása */
 
 if(currentStep === 1){
-
 scanButton.style.display = "block"
-
+cardScanButton.style.display = "block"
 }
+
+
+
 
 }
 
@@ -379,6 +391,7 @@ submitButton.disabled = true
 submitButton.innerText = "Saving..."
 
 overlay.style.display = "flex"
+overlay.querySelector(".loader-box").innerText = "Saving..."
 
 try{
 
@@ -441,9 +454,16 @@ submitButton.innerText = "Save Lead"
 
 function startScanner(){
 
+if(scanner){
+try{
+scanner.stop()
+}catch(e){}
+}
+
 document.getElementById("reader").style.display = "block"
 
-const scanner = new Html5Qrcode("reader")
+scanner = new Html5Qrcode("reader")
+document.getElementById("closeScanner").style.display = "block"
 
 scanner.start(
 
@@ -460,6 +480,14 @@ parseContact(decodedText)
 scanner.stop()
 
 document.getElementById("reader").style.display = "none"
+document.getElementById("closeScanner").style.display = "none"
+
+overlay.style.display = "flex"
+overlay.querySelector(".loader-box").innerText = "Contact imported"
+
+setTimeout(()=>{
+overlay.style.display = "none"
+},800)
 
 }
 
@@ -554,6 +582,84 @@ if(name) document.getElementById("contact").value = name
 if(company) document.getElementById("company").value = company
 if(phone) document.getElementById("phone").value = phone
 if(email) document.getElementById("email").value = email
+
+}
+
+async function scanBusinessCard(){
+
+const input = document.getElementById("cardUpload")
+
+input.click()
+
+input.onchange = async function(){
+
+const file = input.files[0]
+
+if(!file) return
+
+overlay.style.display = "flex"
+
+const { data } = await Tesseract.recognize(
+file,
+"eng"
+)
+
+overlay.style.display = "none"
+
+const text = data.text
+
+console.log("OCR TEXT:", text)
+
+/* EMAIL keresés */
+
+const emailMatch = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)
+
+/* PHONE keresés */
+
+const phoneMatch = text.match(/(\+?\d[\d\s\-]{7,}\d)/)
+
+/* NAME próbálkozás */
+
+const lines = text.split("\n").filter(l => l.trim() !== "")
+
+let possibleName = ""
+
+if(lines.length > 0){
+possibleName = lines[0]
+}
+
+/* FIELD FILL */
+
+if(emailMatch){
+document.getElementById("email").value = emailMatch[0]
+}
+
+if(phoneMatch){
+document.getElementById("phone").value = phoneMatch[0]
+}
+
+if(possibleName){
+document.getElementById("contact").value = possibleName
+}
+overlay.style.display = "flex"
+overlay.querySelector(".loader-box").innerText = "Card scanned"
+
+setTimeout(()=>{
+overlay.style.display = "none"
+},800)
+
+}
+}
+document.getElementById("closeScanner").onclick = function(){
+
+if(scanner){
+
+scanner.stop()
+
+}
+
+document.getElementById("reader").style.display = "none"
+document.getElementById("closeScanner").style.display = "none"
 
 }
 
