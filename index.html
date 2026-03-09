@@ -10,7 +10,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <script src="https://unpkg.com/html5-qrcode"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <style>
 
@@ -174,8 +173,6 @@ display:none;
 margin-bottom:20px;
 }
 
-/* LOADING OVERLAY */
-
 #loadingOverlay{
 position:fixed;
 top:0;
@@ -206,25 +203,17 @@ text-align:center;
 
 <div class="container">
 
-<h1>ISM v1.1</h1>
+<h1>ISM v1.2</h1>
 
 <button id="scanButton" class="scan" onclick="startScanner()">
 📷 Scan Contact QR / vCard
 </button>
-
-<button id="cardScanButton" class="scan" onclick="scanBusinessCard()">
-📷 Scan Business Card
-</button>
-
-<input type="file" id="cardUpload" accept="image/*" capture="environment" style="display:none">
 
 <button id="closeScanner" class="scan" style="display:none">
 Close Scanner
 </button>
 
 <div id="reader"></div>
-
-<!-- STEP 1 -->
 
 <div class="step active" id="step1">
 
@@ -248,8 +237,6 @@ Close Scanner
 </div>
 
 </div>
-
-<!-- STEP 2 -->
 
 <div class="step" id="step2">
 
@@ -287,8 +274,6 @@ Close Scanner
 
 </div>
 
-<!-- LOADING SCREEN -->
-
 <div id="loadingOverlay">
 <div class="loader-box">
 Saving...
@@ -306,14 +291,10 @@ const submitButton = document.querySelector(".submit")
 const overlay = document.getElementById("loadingOverlay")
 
 let scanButton = null
-let cardScanButton = null
 
 document.addEventListener("DOMContentLoaded", () => {
-  scanButton = document.getElementById("scanButton")
-  cardScanButton = document.getElementById("cardScanButton")
+scanButton = document.getElementById("scanButton")
 })
-
-/* STEP NAVIGATION */
 
 function nextStep(){
 
@@ -326,9 +307,9 @@ currentStep++
 document.getElementById("step"+currentStep).classList.add("active")
 
 }
+
 if(currentStep === 2){
 scanButton.style.display = "none"
-cardScanButton.style.display = "none"
 }
 
 }
@@ -344,20 +325,12 @@ currentStep--
 document.getElementById("step"+currentStep).classList.add("active")
 
 }
-/* scanner gomb visszahozása */
 
 if(currentStep === 1){
 scanButton.style.display = "block"
-cardScanButton.style.display = "block"
 }
 
-
-
-
 }
-
-
-/* TOGGLE BUYER SELLER */
 
 function selectToggle(el){
 
@@ -366,9 +339,6 @@ document.querySelectorAll(".toggle").forEach(t => t.classList.remove("active"))
 el.classList.add("active")
 
 }
-
-
-/* BRAND SELECT */
 
 document.querySelectorAll(".brand").forEach(brand => {
 
@@ -380,9 +350,6 @@ brand.classList.toggle("active")
 
 })
 
-
-/* SUBMIT FORM */
-
 async function submitForm(){
 
 if(submitButton.disabled) return
@@ -391,7 +358,6 @@ submitButton.disabled = true
 submitButton.innerText = "Saving..."
 
 overlay.style.display = "flex"
-overlay.querySelector(".loader-box").innerText = "Saving..."
 
 try{
 
@@ -416,7 +382,6 @@ Array.from(document.querySelectorAll(".brand.active"))
 formData.append("phone", document.getElementById("phone").value)
 formData.append("email", document.getElementById("email").value)
 
-
 await fetch(
 "https://script.google.com/macros/s/AKfycbyJIJ718HHofwJhyyfxJ_qcq1-GcOCNxscZ_sCMsDAThG1vOmTRxWzfs6Vogz30h6nj/exec",
 {
@@ -436,21 +401,16 @@ location.reload()
 
 }catch(err){
 
-console.error(err)
-
 alert("Error saving lead")
 
 overlay.style.display = "none"
 
 submitButton.disabled = false
-submitButton.innerText = "Save Lead"
+submitButton.innerText = "Save"
 
 }
 
 }
-
-
-/* QR SCANNER */
 
 function startScanner(){
 
@@ -463,6 +423,7 @@ scanner.stop()
 document.getElementById("reader").style.display = "block"
 
 scanner = new Html5Qrcode("reader")
+
 document.getElementById("closeScanner").style.display = "block"
 
 scanner.start(
@@ -472,8 +433,6 @@ scanner.start(
 { fps:10, qrbox:250 },
 
 (decodedText) => {
-
-console.log("QR content:", decodedText)
 
 parseContact(decodedText)
 
@@ -495,12 +454,7 @@ overlay.style.display = "none"
 
 }
 
-
-/* CONTACT PARSER */
-
 function parseContact(text){
-
-/* VCARD */
 
 if(text.includes("BEGIN:VCARD")){
 
@@ -522,9 +476,6 @@ return
 
 }
 
-
-/* MECARD */
-
 if(text.startsWith("MECARD:")){
 
 const name = text.match(/N:([^;]*)/)?.[1] || ""
@@ -538,43 +489,7 @@ return
 
 }
 
-
-/* PHONE QR */
-
-if(text.startsWith("tel:")){
-
-document.getElementById("phone").value = text.replace("tel:","")
-
-return
-
 }
-
-
-/* EMAIL QR */
-
-if(text.startsWith("mailto:")){
-
-document.getElementById("email").value = text.replace("mailto:","")
-
-return
-
-}
-
-
-/* LINK QR */
-
-if(text.startsWith("http")){
-
-alert("This QR contains a link. Please copy details manually.")
-
-return
-
-}
-
-}
-
-
-/* FILL FORM FIELDS */
 
 function fillFields(name, company, phone, email){
 
@@ -585,77 +500,10 @@ if(email) document.getElementById("email").value = email
 
 }
 
-async function scanBusinessCard(){
-
-const input = document.getElementById("cardUpload")
-
-input.click()
-
-input.onchange = async function(){
-
-const file = input.files[0]
-
-if(!file) return
-
-overlay.style.display = "flex"
-
-const { data } = await Tesseract.recognize(
-file,
-"eng"
-)
-
-overlay.style.display = "none"
-
-const text = data.text
-
-console.log("OCR TEXT:", text)
-
-/* EMAIL keresés */
-
-const emailMatch = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)
-
-/* PHONE keresés */
-
-const phoneMatch = text.match(/(\+?\d[\d\s\-]{7,}\d)/)
-
-/* NAME próbálkozás */
-
-const lines = text.split("\n").filter(l => l.trim() !== "")
-
-let possibleName = ""
-
-if(lines.length > 0){
-possibleName = lines[0]
-}
-
-/* FIELD FILL */
-
-if(emailMatch){
-document.getElementById("email").value = emailMatch[0]
-}
-
-if(phoneMatch){
-document.getElementById("phone").value = phoneMatch[0]
-}
-
-if(possibleName){
-document.getElementById("contact").value = possibleName
-}
-overlay.style.display = "flex"
-overlay.querySelector(".loader-box").innerText = "Card scanned"
-
-setTimeout(()=>{
-overlay.style.display = "none"
-},800)
-
-}
-}
 document.getElementById("closeScanner").onclick = function(){
 
 if(scanner){
-
 scanner.stop()
-
 }
 
 document.getElementById("reader").style.display = "none"
