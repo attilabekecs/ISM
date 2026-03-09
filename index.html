@@ -481,7 +481,14 @@ const company = text.match(/ORG:(.*)/)?.[1] || ""
 const phone = text.match(/TEL[^:]*:(.*)/)?.[1] || ""
 const email = text.match(/EMAIL[^:]*:(.*)/)?.[1] || ""
 
+const adr = text.match(/ADR:(.*)/)?.[1] || ""
+const country = adr.split(";")[6] || ""
+
 fillFields(name, company, phone, email)
+
+if(country){
+document.getElementById("country").value = country
+}
 
 return
 
