@@ -313,6 +313,8 @@ brand.classList.toggle("active")
 
 async function submitForm(){
 
+try{
+
 const formData = new FormData()
 
 formData.append("company", document.getElementById("company").value)
@@ -334,7 +336,6 @@ Array.from(document.querySelectorAll(".brand.active"))
 formData.append("phone", document.getElementById("phone").value)
 formData.append("email", document.getElementById("email").value)
 
-
 await fetch(
 "https://script.google.com/macros/s/AKfycbyJIJ718HHofwJhyyfxJ_qcq1-GcOCNxscZ_sCMsDAThG1vOmTRxWzfs6Vogz30h6nj/exec",
 {
@@ -347,6 +348,13 @@ body:formData
 alert("Lead Saved")
 
 location.reload()
+
+}catch(err){
+
+console.error(err)
+alert("Error saving lead")
+
+}
 
 }
 
