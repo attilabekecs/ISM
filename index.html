@@ -1,195 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>ISM</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
+<script src="https://unpkg.com/html5-qrcode"></script>
+
 <style>
+
 :root{
-  --bg:#0f172a;
-  --card:#1e293b;
-  --accent:#38bdf8;
-  --accent-soft:#0ea5e9;
-  --text:#f1f5f9;
-  --muted:#94a3b8;
-  --success:#22c55e;
+--bg:#0f172a;
+--card:#1e293b;
+--accent:#38bdf8;
+--accent-soft:#0ea5e9;
+--text:#f1f5f9;
+--muted:#94a3b8;
+--success:#22c55e;
 }
 
 *{box-sizing:border-box}
+
 body{
-  margin:0;
-  font-family:Inter,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  display:flex;
-  justify-content:center;
-  padding:20px;
+margin:0;
+font-family:Inter,sans-serif;
+background:var(--bg);
+color:var(--text);
+display:flex;
+justify-content:center;
+padding:20px;
 }
 
 .container{
-  width:100%;
-  max-width:500px;
-  background:var(--card);
-  border-radius:20px;
-  padding:28px;
-  box-shadow:0 20px 60px rgba(0,0,0,.6);
+width:100%;
+max-width:500px;
+background:var(--card);
+border-radius:20px;
+padding:28px;
+box-shadow:0 20px 60px rgba(0,0,0,.6);
 }
 
 h1{
-  text-align:center;
-  margin-bottom:20px;
-  font-size:1.4rem;
+text-align:center;
+margin-bottom:20px;
+font-size:1.4rem;
 }
 
 .step{
-  display:none;
-  animation:fade .3s ease;
+display:none;
+animation:fade .3s ease;
 }
 
 .step.active{
-  display:block;
+display:block;
 }
 
 @keyframes fade{
-  from{opacity:0;transform:translateY(8px)}
-  to{opacity:1;transform:translateY(0)}
+from{opacity:0;transform:translateY(8px)}
+to{opacity:1;transform:translateY(0)}
 }
 
 label{
-  font-size:.8rem;
-  color:var(--muted);
-  margin-bottom:6px;
-  display:block;
+font-size:.8rem;
+color:var(--muted);
+margin-bottom:6px;
+display:block;
 }
 
 input{
-  width:100%;
-  padding:14px;
-  border-radius:14px;
-  border:none;
-  background:#0f172a;
-  color:var(--text);
-  margin-bottom:14px;
-  font-size:1rem;
+width:100%;
+padding:14px;
+border-radius:14px;
+border:none;
+background:#0f172a;
+color:var(--text);
+margin-bottom:14px;
+font-size:1rem;
 }
 
 .toggle-group{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  margin-bottom:20px;
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
+margin-bottom:20px;
 }
 
 .toggle{
-  background:#0f172a;
-  border:2px solid transparent;
-  padding:14px;
-  border-radius:14px;
-  text-align:center;
-  cursor:pointer;
-  font-weight:600;
-  transition:.2s;
+background:#0f172a;
+border:2px solid transparent;
+padding:14px;
+border-radius:14px;
+text-align:center;
+cursor:pointer;
+font-weight:600;
 }
 
 .toggle.active{
-  border:2px solid var(--accent);
-  background:#082f49;
+border:2px solid var(--accent);
+background:#082f49;
 }
 
 .brand-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:12px;
 }
 
 .brand{
-  background:#0f172a;
-  border:2px solid transparent;
-  border-radius:16px;
-  padding:18px;
-  text-align:center;
-  font-weight:600;
-  cursor:pointer;
-  transition:.2s;
+background:#0f172a;
+border:2px solid transparent;
+border-radius:16px;
+padding:18px;
+text-align:center;
+font-weight:600;
+cursor:pointer;
 }
 
 .brand.active{
-  border:2px solid var(--accent);
-  background:#082f49;
-}
-
-.search{
-  margin-bottom:16px;
+border:2px solid var(--accent);
+background:#082f49;
 }
 
 .buttons{
-  margin-top:25px;
-  display:flex;
-  gap:10px;
+margin-top:25px;
+display:flex;
+gap:10px;
 }
 
 button{
-  flex:1;
-  padding:16px;
-  border:none;
-  border-radius:16px;
-  font-weight:600;
-  cursor:pointer;
-  font-size:1rem;
+flex:1;
+padding:16px;
+border:none;
+border-radius:16px;
+font-weight:600;
+cursor:pointer;
+font-size:1rem;
 }
 
 .next{
-  background:linear-gradient(135deg,var(--accent),var(--accent-soft));
-  color:#fff;
+background:linear-gradient(135deg,var(--accent),var(--accent-soft));
+color:#fff;
 }
 
 .back{
-  background:#334155;
-  color:#fff;
+background:#334155;
+color:#fff;
 }
 
 .submit{
-  background:var(--success);
-  color:#fff;
+background:var(--success);
+color:#fff;
 }
 
-.progress{
-  height:6px;
-  background:#0f172a;
-  border-radius:8px;
-  margin-bottom:20px;
-  overflow:hidden;
+.scan{
+width:100%;
+padding:14px;
+margin-bottom:20px;
+background:#38bdf8;
+border:none;
+border-radius:12px;
+color:white;
+font-weight:600;
+cursor:pointer;
 }
 
-.progress-bar{
-  height:100%;
-  width:33%;
-  background:var(--accent);
-  transition:.3s;
+#reader{
+display:none;
+margin-bottom:20px;
 }
 
-.success-screen{
-  display:none;
-  text-align:center;
-}
-
-.success-screen.active{
-  display:block;
-}
-
-.success-screen h2{
-  color:var(--success);
-}
-
-@media(max-width:480px){
-  .brand{
-    padding:22px;
-    font-size:1rem;
-  }
-}
 </style>
 </head>
 
@@ -197,214 +180,220 @@ button{
 
 <div class="container">
 
-<h1>ISM v0.2</h1>
+<h1>ISM v0.3</h1>
 
-<div class="progress">
-  <div class="progress-bar" id="progressBar"></div>
-</div>
+<button class="scan" onclick="startScanner()">
+📷 Scan Contact QR / vCard
+</button>
+
+<div id="reader"></div>
 
 <!-- STEP 1 -->
+
 <div class="step active" id="step1">
-  <label>Company</label>
-  <input type="text" id="company">
 
-  <label>Country</label>
-  <input type="text" id="country">
+<label>Company</label>
+<input type="text" id="company">
 
-  <label>Contact Person</label>
-  <input type="text" id="contact">
+<label>Country</label>
+<input type="text" id="country">
 
-  <div class="buttons">
-    <button class="next" onclick="nextStep()">Next</button>
-  </div>
+<label>Contact Person</label>
+<input type="text" id="contact">
+
+<div class="buttons">
+<button class="next" onclick="nextStep()">Next</button>
 </div>
+
+</div>
+
 
 <!-- STEP 2 -->
+
 <div class="step" id="step2">
-  <label>We are</label>
-  <div class="toggle-group">
-    <div class="toggle" onclick="selectToggle(this)">Buyer</div>
-    <div class="toggle" onclick="selectToggle(this)">Seller</div>
-    <div class="toggle" onclick="selectToggle(this)">Both</div>
-  </div>
 
-  <label>Brands of Interest</label>
-  <input type="text" class="search" placeholder="Search brand..." onkeyup="filterBrands(this.value)">
+<label>We are</label>
 
-  <div class="brand-grid" id="brandGrid">
-    <div class="brand">Kinder</div>
-    <div class="brand">Milka</div>
-    <div class="brand">Haribo</div>
-    <div class="brand">Mars</div>
-    <div class="brand">Snickers</div>
-    <div class="brand">KitKat</div>
-    <div class="brand">Hell</div>
-    <div class="brand">Red Bull</div>
-    <div class="brand">XIXO</div>
-    <div class="brand">Nescafé</div>
-  </div>
-
-  <div class="buttons">
-    <button class="back" onclick="prevStep()">Back</button>
-    <button class="next" onclick="nextStep()">Next</button>
-  </div>
+<div class="toggle-group">
+<div class="toggle" onclick="selectToggle(this)">Buyer</div>
+<div class="toggle" onclick="selectToggle(this)">Seller</div>
+<div class="toggle" onclick="selectToggle(this)">Both</div>
 </div>
+
+<label>Brands of Interest</label>
+
+<div class="brand-grid">
+
+<div class="brand">Kinder</div>
+<div class="brand">Milka</div>
+<div class="brand">Haribo</div>
+<div class="brand">Mars</div>
+<div class="brand">Snickers</div>
+<div class="brand">KitKat</div>
+<div class="brand">Hell</div>
+<div class="brand">Red Bull</div>
+<div class="brand">XIXO</div>
+<div class="brand">Nescafé</div>
+
+</div>
+
+<div class="buttons">
+<button class="back" onclick="prevStep()">Back</button>
+<button class="next" onclick="nextStep()">Next</button>
+</div>
+
+</div>
+
 
 <!-- STEP 3 -->
+
 <div class="step" id="step3">
-  <label>Phone</label>
-  <input type="tel">
 
-  <label>Email</label>
-  <input type="email">
+<label>Phone</label>
+<input type="tel" id="phone">
 
-  <label>Business Card Photo</label>
-<input type="file" id="cardPhoto" accept="image/*" capture="environment">
+<label>Email</label>
+<input type="email" id="email">
 
-  <div class="buttons">
-    <button class="back" onclick="prevStep()">Back</button>
-    <button class="submit" onclick="submitForm()">Save Lead</button>
-  </div>
-</div>
-
-<div class="success-screen" id="successScreen">
-  <h2>✔ Lead Saved</h2>
-  <p>Ready for next partner.</p>
+<div class="buttons">
+<button class="back" onclick="prevStep()">Back</button>
+<button class="submit" onclick="submitForm()">Save Lead</button>
 </div>
 
 </div>
+
+</div>
+
 
 <script>
-let currentStep = 1;
-const totalSteps = 3;
 
-function updateProgress(){
-  const percent = (currentStep/totalSteps)*100;
-  document.getElementById("progressBar").style.width = percent + "%";
-}
+let currentStep = 1
+const totalSteps = 3
 
 function nextStep(){
-  if(currentStep < totalSteps){
-    document.getElementById("step"+currentStep).classList.remove("active");
-    currentStep++;
-    document.getElementById("step"+currentStep).classList.add("active");
-    updateProgress();
-  }
+
+if(currentStep < totalSteps){
+
+document.getElementById("step"+currentStep).classList.remove("active")
+currentStep++
+
+document.getElementById("step"+currentStep).classList.add("active")
+
+}
+
 }
 
 function prevStep(){
-  if(currentStep > 1){
-    document.getElementById("step"+currentStep).classList.remove("active");
-    currentStep--;
-    document.getElementById("step"+currentStep).classList.add("active");
-    updateProgress();
-  }
+
+if(currentStep > 1){
+
+document.getElementById("step"+currentStep).classList.remove("active")
+currentStep--
+
+document.getElementById("step"+currentStep).classList.add("active")
+
 }
+
+}
+
 
 function selectToggle(el){
-  document.querySelectorAll(".toggle").forEach(t=>t.classList.remove("active"));
-  el.classList.add("active");
+
+document.querySelectorAll(".toggle").forEach(t=>t.classList.remove("active"))
+el.classList.add("active")
+
 }
+
 
 document.querySelectorAll(".brand").forEach(brand=>{
-  brand.addEventListener("click",()=>{
-    brand.classList.toggle("active");
-  });
-});
 
-function filterBrands(value){
-  value = value.toLowerCase();
-  document.querySelectorAll(".brand").forEach(b=>{
-    b.style.display = b.textContent.toLowerCase().includes(value) ? "block":"none";
-  });
-}
+brand.addEventListener("click",()=>{
+
+brand.classList.toggle("active")
+
+})
+
+})
+
 
 async function submitForm(){
 
-  const button = document.querySelector(".submit");
-  button.disabled = true;
-  button.innerText = "Saving...";
+const data = {
 
-  const photoInput = document.getElementById("cardPhoto");
-  let imageBlob = null;
+company:document.getElementById("company").value,
+country:document.getElementById("country").value,
+contact:document.getElementById("contact").value,
 
-  if(photoInput.files.length > 0){
-    const file = photoInput.files[0];
-    imageBlob = await resizeImage(file);
-  }
+type:document.querySelector(".toggle.active")?.textContent || "",
 
-  const formData = new FormData();
+brands:Array.from(document.querySelectorAll(".brand.active"))
+.map(b=>b.textContent)
+.join(", "),
 
-  formData.append("company", document.getElementById("company").value);
-  formData.append("country", document.getElementById("country").value);
-  formData.append("contact", document.getElementById("contact").value);
-  formData.append("type", document.querySelector(".toggle.active")?.textContent || "");
-  formData.append("brands", JSON.stringify(
-    Array.from(document.querySelectorAll(".brand.active")).map(b=>b.textContent)
-  ));
-  formData.append("phone", document.querySelector('input[type="tel"]').value);
-  formData.append("email", document.querySelector('input[type="email"]').value);
+phone:document.getElementById("phone").value,
+email:document.getElementById("email").value
 
-  if(imageBlob){
-    formData.append("image", imageBlob, "card.jpg");
-  }
+}
 
-  try {
+await fetch("https://script.google.com/macros/s/AKfycbxp_L4f4dE5LghgkDdVZgABFXfTm9HFyg-F2Ogjg_fcqY8nh8CiccRuLykK8NYGsx-6OQ/exec",{
 
-    await fetch("https://script.google.com/macros/s/AKfycbxp_L4f4dE5LghgkDdVZgABFXfTm9HFyg-F2Ogjg_fcqY8nh8CiccRuLykK8NYGsx-6OQ/exec", {
-      method: "POST",
-      mode: "no-cors",
-      body: formData
-    });
+method:"POST",
+mode:"no-cors",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(data)
 
-    button.innerText = "Saved ✓";
-    setTimeout(()=> location.reload(), 1000);
+})
 
-  } catch(err){
-    button.disabled = false;
-    button.innerText = "Save Lead";
-    alert("Error saving lead.");
-  }
+alert("Lead Saved")
+
+location.reload()
+
 }
 
 
-/* IMAGE RESIZE FUNCTION */
 
-function resizeImage(file){
+function startScanner(){
 
-  return new Promise((resolve) => {
+document.getElementById("reader").style.display="block"
 
-    const img = new Image();
-    const reader = new FileReader();
+const scanner = new Html5Qrcode("reader")
 
-    reader.onload = e => {
-      img.src = e.target.result;
-    };
+scanner.start(
 
-    img.onload = () => {
+{ facingMode:"environment" },
 
-      const canvas = document.createElement("canvas");
-      const maxWidth = 800;
+{ fps:10, qrbox:250 },
 
-      const scale = maxWidth / img.width;
+(decodedText)=>{
 
-      canvas.width = maxWidth;
-      canvas.height = img.height * scale;
+parseVCard(decodedText)
 
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+scanner.stop()
 
-      canvas.toBlob(blob=>{
-        resolve(blob);
-      }, "image/jpeg", 0.7);
-
-    };
-
-    reader.readAsDataURL(file);
-
-  });
+document.getElementById("reader").style.display="none"
 
 }
+
+)
+
+}
+
+
+
+function parseVCard(text){
+
+const name=text.match(/FN:(.*)/)?.[1] || ""
+const company=text.match(/ORG:(.*)/)?.[1] || ""
+const phone=text.match(/TEL:(.*)/)?.[1] || ""
+const email=text.match(/EMAIL:(.*)/)?.[1] || ""
+
+if(name) document.getElementById("contact").value=name
+if(company) document.getElementById("company").value=company
+if(phone) document.getElementById("phone").value=phone
+if(email) document.getElementById("email").value=email
+
+}
+
 </script>
 
 </body>
