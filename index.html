@@ -264,7 +264,6 @@ margin-bottom:20px;
 
 </div>
 
-
 <script>
 
 let currentStep = 1
@@ -296,14 +295,12 @@ document.getElementById("step"+currentStep).classList.add("active")
 
 }
 
-
 function selectToggle(el){
 
 document.querySelectorAll(".toggle").forEach(t=>t.classList.remove("active"))
 el.classList.add("active")
 
 }
-
 
 document.querySelectorAll(".brand").forEach(brand=>{
 
@@ -314,7 +311,6 @@ brand.classList.toggle("active")
 })
 
 })
-
 
 async function submitForm(){
 
@@ -345,12 +341,12 @@ body:JSON.stringify(data)
 })
 
 alert("Lead Saved")
-
 location.reload()
 
 }
 
 
+/* QR SCANNER */
 
 function startScanner(){
 
@@ -366,7 +362,9 @@ scanner.start(
 
 (decodedText)=>{
 
-parseVCard(decodedText)
+console.log("QR content:", decodedText)
+
+parseContact(decodedText)
 
 scanner.stop()
 
@@ -379,18 +377,83 @@ document.getElementById("reader").style.display="none"
 }
 
 
+/* CONTACT PARSER */
 
-function parseVCard(text){
+function parseContact(text){
 
-const name=text.match(/FN:(.*)/)?.[1] || ""
-const company=text.match(/ORG:(.*)/)?.[1] || ""
-const phone=text.match(/TEL:(.*)/)?.[1] || ""
-const email=text.match(/EMAIL:(.*)/)?.[1] || ""
+/* VCARD */
 
-if(name) document.getElementById("contact").value=name
-if(company) document.getElementById("company").value=company
-if(phone) document.getElementById("phone").value=phone
-if(email) document.getElementById("email").value=email
+if(text.includes("BEGIN:VCARD")){
+
+const name = text.match(/FN:(.*)/)?.[1] || ""
+const company = text.match(/ORG:(.*)/)?.[1] || ""
+const phone = text.match(/TEL[^:]*:(.*)/)?.[1] || ""
+const email = text.match(/EMAIL[^:]*:(.*)/)?.[1] || ""
+
+fillFields(name,company,phone,email)
+
+return
+
+}
+
+
+/* MECARD */
+
+if(text.startsWith("MECARD:")){
+
+const name = text.match(/N:([^;]*)/)?.[1] || ""
+const company = text.match(/ORG:([^;]*)/)?.[1] || ""
+const phone = text.match(/TEL:([^;]*)/)?.[1] || ""
+const email = text.match(/EMAIL:([^;]*)/)?.[1] || ""
+
+fillFields(name,company,phone,email)
+
+return
+
+}
+
+
+/* TEL QR */
+
+if(text.startsWith("tel:")){
+
+document.getElementById("phone").value = text.replace("tel:","")
+return
+
+}
+
+
+/* EMAIL QR */
+
+if(text.startsWith("mailto:")){
+
+document.getElementById("email").value = text.replace("mailto:","")
+return
+
+}
+
+
+/* URL (LinkedIn stb.) */
+
+if(text.startsWith("http")){
+
+alert("This QR contains a link. Please copy details manually.")
+
+return
+
+}
+
+}
+
+
+/* FIELD FILLER */
+
+function fillFields(name,company,phone,email){
+
+if(name) document.getElementById("contact").value = name
+if(company) document.getElementById("company").value = company
+if(phone) document.getElementById("phone").value = phone
+if(email) document.getElementById("email").value = email
 
 }
 
