@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>ISM Email Status Report</title>
+<title>ISM Status Overview</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -11,76 +11,59 @@
 body{
 font-family:Inter,sans-serif;
 background:#0f172a;
-padding:30px;
 color:#f8fafc;
+padding:30px;
 }
 
 .wrapper{
-max-width:1100px;
+max-width:1300px;
 margin:auto;
 }
 
-.topbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
-}
-
-button{
-border:none;
-padding:10px 14px;
-border-radius:10px;
-font-weight:600;
-cursor:pointer;
-}
-
-.btn-primary{
-background:#38bdf8;
-color:white;
-}
-
-.btn-secondary{
-background:#334155;
-color:white;
-}
-
-.email-box{
-background:#1e293b;
-border-radius:16px;
-padding:20px;
-border:1px solid rgba(255,255,255,.06);
+h1{
+margin-bottom:25px;
 }
 
 .status-block{
-margin-top:25px;
+margin-bottom:40px;
 }
 
 .status-title{
+font-size:20px;
 font-weight:700;
-font-size:18px;
-margin-bottom:10px;
+margin-bottom:12px;
 }
 
-.row{
-display:flex;
-flex-wrap:wrap;
-gap:10px;
-background:#111827;
+table{
+width:100%;
+border-collapse:collapse;
+background:#1e293b;
 border-radius:10px;
+overflow:hidden;
+}
+
+thead{
+background:#334155;
+}
+
+th{
+text-align:left;
 padding:10px;
-margin-bottom:8px;
 font-size:13px;
 }
 
-.cell{
-background:#1e293b;
-padding:6px 10px;
-border-radius:6px;
+td{
+padding:10px;
+font-size:13px;
+border-top:1px solid rgba(255,255,255,.05);
+}
+
+tr:nth-child(even){
+background:#111827;
 }
 
 .company{
-font-weight:700;
+font-weight:600;
 }
 
 </style>
@@ -91,20 +74,9 @@ font-weight:700;
 
 <div class="wrapper">
 
-<div class="topbar">
+<h1>ISM 2026 Partner Status</h1>
 
-<h2>ISM 2026 Email Status Report</h2>
-
-<div>
-<button class="btn-primary" onclick="generate()">Generate</button>
-<button class="btn-secondary" onclick="copyBox()">Copy</button>
-</div>
-
-</div>
-
-<div id="emailBox" class="email-box">
-Click Generate
-</div>
+<div id="tableContainer"></div>
 
 </div>
 
@@ -123,7 +95,10 @@ document.body.appendChild(s);
 }
 
 function handleData(data){
+
 allData=data;
+render();
+
 }
 
 function normalize(r){
@@ -132,7 +107,6 @@ return{
 company:r.Company||"",
 contact:r.Contact||"",
 country:r.Country||"",
-email:r.Email||"",
 phone:r.Phone||"",
 brands:r.Brands||"",
 type:r.Type||"",
@@ -142,7 +116,19 @@ statusDate:r["Státusz változás"]||""
 
 }
 
-function generate(){
+function formatDate(d){
+
+if(!d) return "";
+
+const date=new Date(d);
+
+if(isNaN(date)) return d;
+
+return date.toISOString().split("T")[0];
+
+}
+
+function render(){
 
 const rows=allData.map(normalize);
 
@@ -150,7 +136,7 @@ const groups={};
 
 rows.forEach(r=>{
 
-if(!r.status)return;
+if(!r.status) return;
 
 if(!groups[r.status]) groups[r.status]=[];
 
@@ -164,59 +150,53 @@ Object.keys(groups).forEach(status=>{
 
 html+=`
 <div class="status-block">
-<div class="status-title">${status} (${groups[status].length})</div>
+
+<div class="status-title">
+${status} (${groups[status].length})
+</div>
+
+<table>
+
+<thead>
+<tr>
+<th>Company</th>
+<th>Contact</th>
+<th>Country</th>
+<th>Type</th>
+<th>Phone</th>
+<th>Brands</th>
+<th>Status Date</th>
+</tr>
+</thead>
+
+<tbody>
 `;
 
 groups[status].forEach(p=>{
 
 html+=`
-<div class="row">
+<tr>
+<td class="company">${p.company}</td>
+<td>${p.contact}</td>
+<td>${p.country}</td>
+<td>${p.type}</td>
+<td>${p.phone}</td>
+<td>${p.brands}</td>
+<td>${formatDate(p.statusDate)}</td>
+</tr>
+`;
 
-<div class="cell company">${p.company}</div>
+});
 
-<div class="cell">${p.contact}</div>
-
-<div class="cell">${p.country}</div>
-
-<div class="cell">${p.type}</div>
-
-${p.email?`<div class="cell">${p.email}</div>`:""}
-
-${p.phone?`<div class="cell">${p.phone}</div>`:""}
-
-${p.brands?`<div class="cell">${p.brands}</div>`:""}
-
-${p.statusDate?`<div class="cell">${p.statusDate}</div>`:""}
-
+html+=`
+</tbody>
+</table>
 </div>
 `;
 
 });
 
-html+="</div>";
-
-});
-
-document.getElementById("emailBox").innerHTML=html;
-
-}
-
-function copyBox(){
-
-const box=document.getElementById("emailBox");
-
-const range=document.createRange();
-range.selectNode(box);
-
-const sel=window.getSelection();
-sel.removeAllRanges();
-sel.addRange(range);
-
-document.execCommand("copy");
-
-sel.removeAllRanges();
-
-alert("Copied for email");
+document.getElementById("tableContainer").innerHTML=html;
 
 }
 
