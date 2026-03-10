@@ -52,29 +52,33 @@ font-size:13px;
 border-top:1px solid rgba(255,255,255,.05);
 }
 
-/* STATUS ROW COLORS */
+/* STATUS COLORS */
 
-.row-waiting{
-background:#3a2e0b;
+/* Szerződés folyamatban */
+
+.row-contract{
+background:#4a3b0a;
 }
 
-.row-docs{
-background:#1e3a5f;
+/* Termékeket beszéljük */
+
+.row-discussion{
+background:#173c63;
 }
 
-.row-negotiation{
-background:#3b1e5f;
+/* Nem aktív */
+
+.row-inactive{
+background:#4b1f1f;
 }
 
-.row-confirmed{
-background:#124d2f;
-}
+/* Egyéb */
 
 .row-other{
 background:#1e293b;
 }
 
-/* HOVER */
+/* Hover */
 
 tr:hover{
 background:#475569;
@@ -167,14 +171,20 @@ function getStatusClass(status){
 
 const s=status.toLowerCase();
 
-if(s.includes("aláír")) return "waiting";
+/* SZERZŐDÉS FOLYAMATBAN */
 
-if(s.includes("dokument")) return "docs";
+if(s.includes("szerződés"))
+return "contract";
 
-if(s.includes("termék") || s.includes("beszél") || s.includes("discussion"))
-return "negotiation";
+/* TERMÉK BESZÉLGETÉS */
 
-if(s.includes("confirm")) return "confirmed";
+if(s.includes("termék") || s.includes("beszél"))
+return "discussion";
+
+/* NEM AKTÍV */
+
+if(s.includes("nem aktív") || s.includes("inactive"))
+return "inactive";
 
 return "other";
 
