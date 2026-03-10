@@ -359,7 +359,9 @@ button:hover{
       <div class="actions">
         <button class="btn-secondary" onclick="loadDataJSONP()">Refresh</button>
         <button class="btn-primary" onclick="exportExcel()">Download Excel</button>
+        <button class="btn-secondary" onclick="copyStatusReport()">Copy Status Email</button>
       </div>
+      
     </div>
 
     <div class="search-wrap">
@@ -485,7 +487,9 @@ function normalize(row){
     brands: (row.Brands && row.Brands !== "[]") ? row.Brands : "",
     phone: row.Phone || "",
     email: row.Email || "",
-    imageUrl: row["Image URL"] || ""
+    imageUrl: row["Image URL"] || "",   // ← EZ HIÁNYZOTT
+    status: row["Státusz"] || "",
+    statusDate: row["Státusz változás"] || ""
   };
 }
 
@@ -504,14 +508,15 @@ function renderDashboard(data){
     if (!query) return true;
 
     const haystack = [
-      row.company,
-      row.country,
-      row.contact,
-      row.type,
-      row.brands,
-      row.phone,
-      row.email
-    ].join(" ").toLowerCase();
+  row.company,
+  row.country,
+  row.contact,
+  row.type,
+  row.brands,
+  row.phone,
+  row.email,
+  row.status     // ← add hozzá
+].join(" ").toLowerCase();
 
     return haystack.includes(query);
   });
@@ -633,6 +638,8 @@ function renderLatestLeads(filtered){
             ${metaParts.map(item => `<span>${escapeHtml(item)}</span>`).join("")}
           </div>
           ${row.brands ? `<div class="list-sub" style="margin-top:8px;">Brands: ${escapeHtml(row.brands)}</div>` : ""}
+          ${row.status ? `<div class="list-sub" style="margin-top:6px;">Status: ${escapeHtml(row.status)}</div>` : ""}
+          ${row.statusDate ? `<div class="list-sub">Status change: ${escapeHtml(row.statusDate)}</div>` : ""}
         </div>
 
         <div class="lead-side">
@@ -740,6 +747,65 @@ document.addEventListener("DOMContentLoaded", () => {
   loadDataJSONP();
   setInterval(loadDataJSONP, 15000);
 });
+
+function copyStatusReport(){
+
+  const statusGroups = {};
+
+  allData.map(normalize).forEach(row => {
+
+    if(!row.status) return;
+
+    if(!statusGroups[row.status]){
+      statusGroups[row.status] = [];
+    }
+
+    statusGroups[row.status].push(row);
+
+  });
+
+  let emailText = "ISM 2026 Partner Status Update\n\n";
+
+  Object.keys(statusGroups).forEach(status => {
+
+    emailText += status.toUpperCase() + "\n";
+    emailText += "-----------------------------\n";
+
+    statusGroups[status].forEach(row => {
+
+      emailText += 
+        (row.company || "-") +
+        " | " +
+        (row.contact || "-") +
+        " | " +
+        (row.country || "-") +
+        "\n";
+
+      if(row.email)
+        emailText += "Email: " + row.email + "\n";
+
+      if(row.phone)
+        emailText += "Phone: " + row.phone + "\n";
+
+      if(row.brands)
+        emailText += "Brands: " + row.brands + "\n";
+
+      if(row.statusDate)
+        emailText += "Status change: " + row.statusDate + "\n";
+
+      emailText += "\n";
+
+    });
+
+    emailText += "\n";
+
+  });
+
+  navigator.clipboard.writeText(emailText);
+
+  alert("Status email copied to clipboard.");
+
+}
 </script>
 
 </body>
