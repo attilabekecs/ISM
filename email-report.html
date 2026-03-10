@@ -2,126 +2,147 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>ISM 2026 Email Report</title>
+<title>ISM Email Status Report</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
 
 body{
-font-family:Arial, sans-serif;
-background:#f3f4f6;
-padding:40px;
+font-family:Inter,sans-serif;
+background:#0f172a;
+padding:30px;
+color:#f8fafc;
 }
 
-.container{
-max-width:900px;
+.wrapper{
+max-width:1100px;
 margin:auto;
 }
 
-.controls{
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
 margin-bottom:20px;
 }
 
 button{
-padding:10px 16px;
 border:none;
-border-radius:6px;
-font-weight:bold;
+padding:10px 14px;
+border-radius:10px;
+font-weight:600;
 cursor:pointer;
-margin-right:10px;
 }
 
-.generate{
-background:#2563eb;
+.btn-primary{
+background:#38bdf8;
 color:white;
 }
 
-.copy{
-background:#374151;
+.btn-secondary{
+background:#334155;
 color:white;
 }
 
 .email-box{
-background:white;
-padding:30px;
-border-radius:8px;
-border:1px solid #e5e7eb;
+background:#1e293b;
+border-radius:16px;
+padding:20px;
+border:1px solid rgba(255,255,255,.06);
+}
+
+.status-block{
+margin-top:25px;
 }
 
 .status-title{
-background:#f1f5f9;
-padding:8px 10px;
-border-radius:6px;
-margin-top:30px;
+font-weight:700;
 font-size:18px;
-font-weight:bold;
+margin-bottom:10px;
 }
 
-.partner{
-border:1px solid #e5e7eb;
-padding:12px;
-border-radius:6px;
-margin-top:10px;
-}
-
-.partner strong{
-font-size:15px;
-}
-
-.meta{
-color:#6b7280;
+.row{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+background:#111827;
+border-radius:10px;
+padding:10px;
+margin-bottom:8px;
 font-size:13px;
 }
 
+.cell{
+background:#1e293b;
+padding:6px 10px;
+border-radius:6px;
+}
+
+.company{
+font-weight:700;
+}
+
 </style>
+
 </head>
 
 <body>
 
-<div class="container">
+<div class="wrapper">
 
-<h1>ISM 2026 Email Report</h1>
+<div class="topbar">
 
-<div class="controls">
-<button class="generate" onclick="generateEmail()">Generate Email</button>
-<button class="copy" onclick="copyEmail()">Copy Email</button>
+<h2>ISM 2026 Email Status Report</h2>
+
+<div>
+<button class="btn-primary" onclick="generate()">Generate</button>
+<button class="btn-secondary" onclick="copyBox()">Copy</button>
+</div>
+
 </div>
 
 <div id="emailBox" class="email-box">
-Click "Generate Email"
+Click Generate
 </div>
 
 </div>
 
 <script>
 
-const API_URL = "https://script.google.com/macros/s/AKfycbyJIJ718HHofwJhyyfxJ_qcq1-GcOCNxscZ_sCMsDAThG1vOmTRxWzfs6Vogz30h6nj/exec";
+const API_URL="https://script.google.com/macros/s/AKfycbyJIJ718HHofwJhyyfxJ_qcq1-GcOCNxscZ_sCMsDAThG1vOmTRxWzfs6Vogz30h6nj/exec";
 
 let allData=[];
 
-function loadData(){
-const script=document.createElement("script");
-script.src=API_URL+"?callback=handleData&_="+Date.now();
-document.body.appendChild(script);
+function load(){
+
+const s=document.createElement("script");
+s.src=API_URL+"?callback=handleData&_="+Date.now();
+document.body.appendChild(s);
+
 }
 
 function handleData(data){
 allData=data;
 }
 
-function normalize(row){
+function normalize(r){
+
 return{
-company:row.Company||"",
-contact:row.Contact||"",
-country:row.Country||"",
-email:row.Email||"",
-phone:row.Phone||"",
-brands:row.Brands||"",
-status:row["Státusz"]||"",
-statusDate:row["Státusz változás"]||""
+company:r.Company||"",
+contact:r.Contact||"",
+country:r.Country||"",
+email:r.Email||"",
+phone:r.Phone||"",
+brands:r.Brands||"",
+type:r.Type||"",
+status:r["Státusz"]||"",
+statusDate:r["Státusz változás"]||""
 };
+
 }
 
-function generateEmail(){
+function generate(){
 
 const rows=allData.map(normalize);
 
@@ -129,11 +150,9 @@ const groups={};
 
 rows.forEach(r=>{
 
-if(!r.status) return;
+if(!r.status)return;
 
-if(!groups[r.status]){
-groups[r.status]=[];
-}
+if(!groups[r.status]) groups[r.status]=[];
 
 groups[r.status].push(r);
 
@@ -141,29 +160,40 @@ groups[r.status].push(r);
 
 let html="";
 
-html+=`<h2>ISM 2026 Partner Status Update</h2>`;
-
 Object.keys(groups).forEach(status=>{
 
-html+=`<div class="status-title">${status}</div>`;
+html+=`
+<div class="status-block">
+<div class="status-title">${status} (${groups[status].length})</div>
+`;
 
 groups[status].forEach(p=>{
 
 html+=`
-<div class="partner">
-<strong>${p.company}</strong><br>
-${p.contact}<br>
-<div class="meta">
-${p.country}<br>
-${p.email ? "Email: "+p.email+"<br>" : ""}
-${p.phone ? "Phone: "+p.phone+"<br>" : ""}
-${p.brands ? "Brands: "+p.brands+"<br>" : ""}
-${p.statusDate ? "Status change: "+p.statusDate : ""}
-</div>
+<div class="row">
+
+<div class="cell company">${p.company}</div>
+
+<div class="cell">${p.contact}</div>
+
+<div class="cell">${p.country}</div>
+
+<div class="cell">${p.type}</div>
+
+${p.email?`<div class="cell">${p.email}</div>`:""}
+
+${p.phone?`<div class="cell">${p.phone}</div>`:""}
+
+${p.brands?`<div class="cell">${p.brands}</div>`:""}
+
+${p.statusDate?`<div class="cell">${p.statusDate}</div>`:""}
+
 </div>
 `;
 
 });
+
+html+="</div>";
 
 });
 
@@ -171,7 +201,7 @@ document.getElementById("emailBox").innerHTML=html;
 
 }
 
-function copyEmail(){
+function copyBox(){
 
 const box=document.getElementById("emailBox");
 
@@ -186,11 +216,11 @@ document.execCommand("copy");
 
 sel.removeAllRanges();
 
-alert("Email content copied");
+alert("Copied for email");
 
 }
 
-loadData();
+load();
 
 </script>
 
