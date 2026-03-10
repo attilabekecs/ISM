@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>ISM Status Overview</title>
+<title>ISM 2026 Partner Status</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -24,6 +24,8 @@ h1{
 margin-bottom:25px;
 }
 
+/* TABLE */
+
 table{
 width:100%;
 border-collapse:collapse;
@@ -37,10 +39,9 @@ background:#334155;
 }
 
 th{
-text-align:left;
 padding:12px;
+text-align:left;
 font-size:13px;
-font-weight:600;
 }
 
 td{
@@ -49,11 +50,7 @@ font-size:13px;
 border-top:1px solid rgba(255,255,255,.05);
 }
 
-.company{
-font-weight:600;
-}
-
-/* STATUS BADGES */
+/* STATUS BADGE */
 
 .badge{
 padding:4px 10px;
@@ -65,43 +62,39 @@ display:inline-block;
 
 /* STATUS COLORS */
 
-.status-waiting{
+.waiting{
 background:#f59e0b;
 color:#111827;
 }
 
-.status-negotiation{
+.docs{
 background:#3b82f6;
 }
 
-.status-confirmed{
+.negotiation{
+background:#8b5cf6;
+}
+
+.confirmed{
 background:#22c55e;
 }
 
-.status-rejected{
-background:#ef4444;
+.other{
+background:#64748b;
 }
 
-/* ROW BACKGROUND COLORS */
+/* ROW COLORS */
 
-.row-waiting{
-background:rgba(245,158,11,0.08);
-}
+.row-waiting{background:rgba(245,158,11,0.08);}
+.row-docs{background:rgba(59,130,246,0.08);}
+.row-negotiation{background:rgba(139,92,246,0.08);}
+.row-confirmed{background:rgba(34,197,94,0.08);}
 
-.row-negotiation{
-background:rgba(59,130,246,0.08);
-}
-
-.row-confirmed{
-background:rgba(34,197,94,0.08);
-}
-
-.row-rejected{
-background:rgba(239,68,68,0.08);
+.company{
+font-weight:600;
 }
 
 </style>
-
 </head>
 
 <body>
@@ -183,12 +176,12 @@ function getStatusClass(status){
 
 const s=status.toLowerCase();
 
-if(s.includes("aláírva") || s.includes("waiting")) return "waiting";
-if(s.includes("tárgyalás") || s.includes("negotiation")) return "negotiation";
+if(s.includes("aláír")) return "waiting";
+if(s.includes("dokument")) return "docs";
+if(s.includes("termék") || s.includes("beszél")) return "negotiation";
 if(s.includes("confirm")) return "confirmed";
-if(s.includes("reject")) return "rejected";
 
-return "negotiation";
+return "other";
 
 }
 
@@ -200,13 +193,14 @@ let html="";
 
 rows.forEach(p=>{
 
-const statusClass=getStatusClass(p.status);
+const c=getStatusClass(p.status);
 
 html+=`
-<tr class="row-${statusClass}">
+
+<tr class="row-${c}">
 
 <td>
-<span class="badge status-${statusClass}">
+<span class="badge ${c}">
 ${p.status}
 </span>
 </td>
@@ -226,6 +220,7 @@ ${p.status}
 <td>${formatDate(p.statusDate)}</td>
 
 </tr>
+
 `;
 
 });
