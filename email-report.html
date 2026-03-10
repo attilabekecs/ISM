@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>ISM 2026 Email Report</title>
+
+<style>
+
+body{
+font-family:Arial, sans-serif;
+background:#f3f4f6;
+padding:40px;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+}
+
+.controls{
+margin-bottom:20px;
+}
+
+button{
+padding:10px 16px;
+border:none;
+border-radius:6px;
+font-weight:bold;
+cursor:pointer;
+margin-right:10px;
+}
+
+.generate{
+background:#2563eb;
+color:white;
+}
+
+.copy{
+background:#374151;
+color:white;
+}
+
+.email-box{
+background:white;
+padding:30px;
+border-radius:8px;
+border:1px solid #e5e7eb;
+}
+
+.status-title{
+background:#f1f5f9;
+padding:8px 10px;
+border-radius:6px;
+margin-top:30px;
+font-size:18px;
+font-weight:bold;
+}
+
+.partner{
+border:1px solid #e5e7eb;
+padding:12px;
+border-radius:6px;
+margin-top:10px;
+}
+
+.partner strong{
+font-size:15px;
+}
+
+.meta{
+color:#6b7280;
+font-size:13px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>ISM 2026 Email Report</h1>
+
+<div class="controls">
+<button class="generate" onclick="generateEmail()">Generate Email</button>
+<button class="copy" onclick="copyEmail()">Copy Email</button>
+</div>
+
+<div id="emailBox" class="email-box">
+Click "Generate Email"
+</div>
+
+</div>
+
+<script>
+
+const API_URL = "https://script.google.com/macros/s/AKfycbyJIJ718HHofwJhyyfxJ_qcq1-GcOCNxscZ_sCMsDAThG1vOmTRxWzfs6Vogz30h6nj/exec";
+
+let allData=[];
+
+function loadData(){
+const script=document.createElement("script");
+script.src=API_URL+"?callback=handleData&_="+Date.now();
+document.body.appendChild(script);
+}
+
+function handleData(data){
+allData=data;
+}
+
+function normalize(row){
+return{
+company:row.Company||"",
+contact:row.Contact||"",
+country:row.Country||"",
+email:row.Email||"",
+phone:row.Phone||"",
+brands:row.Brands||"",
+status:row["Státusz"]||"",
+statusDate:row["Státusz változás"]||""
+};
+}
+
+function generateEmail(){
+
+const rows=allData.map(normalize);
+
+const groups={};
+
+rows.forEach(r=>{
+
+if(!r.status) return;
+
+if(!groups[r.status]){
+groups[r.status]=[];
+}
+
+groups[r.status].push(r);
+
+});
+
+let html="";
+
+html+=`<h2>ISM 2026 Partner Status Update</h2>`;
+
+Object.keys(groups).forEach(status=>{
+
+html+=`<div class="status-title">${status}</div>`;
+
+groups[status].forEach(p=>{
+
+html+=`
+<div class="partner">
+<strong>${p.company}</strong><br>
+${p.contact}<br>
+<div class="meta">
+${p.country}<br>
+${p.email ? "Email: "+p.email+"<br>" : ""}
+${p.phone ? "Phone: "+p.phone+"<br>" : ""}
+${p.brands ? "Brands: "+p.brands+"<br>" : ""}
+${p.statusDate ? "Status change: "+p.statusDate : ""}
+</div>
+</div>
+`;
+
+});
+
+});
+
+document.getElementById("emailBox").innerHTML=html;
+
+}
+
+function copyEmail(){
+
+const box=document.getElementById("emailBox");
+
+const range=document.createRange();
+range.selectNode(box);
+
+const sel=window.getSelection();
+sel.removeAllRanges();
+sel.addRange(range);
+
+document.execCommand("copy");
+
+sel.removeAllRanges();
+
+alert("Email content copied");
+
+}
+
+loadData();
+
+</script>
+
+</body>
+</html>
