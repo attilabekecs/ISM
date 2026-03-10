@@ -22,6 +22,7 @@ margin:auto;
 
 h1{
 margin-bottom:25px;
+font-weight:700;
 }
 
 /* TABLE */
@@ -30,7 +31,7 @@ table{
 width:100%;
 border-collapse:collapse;
 background:#1e293b;
-border-radius:10px;
+border-radius:12px;
 overflow:hidden;
 }
 
@@ -39,56 +40,46 @@ background:#334155;
 }
 
 th{
-padding:12px;
+padding:14px;
 text-align:left;
 font-size:13px;
+font-weight:600;
 }
 
 td{
-padding:12px;
+padding:14px;
 font-size:13px;
 border-top:1px solid rgba(255,255,255,.05);
 }
 
-/* STATUS BADGE */
+/* STATUS ROW COLORS */
 
-.badge{
-padding:4px 10px;
-border-radius:999px;
-font-size:12px;
-font-weight:600;
-display:inline-block;
+.row-waiting{
+background:#3a2e0b;
 }
 
-/* STATUS COLORS */
-
-.waiting{
-background:#f59e0b;
-color:#111827;
+.row-docs{
+background:#1e3a5f;
 }
 
-.docs{
-background:#3b82f6;
+.row-negotiation{
+background:#3b1e5f;
 }
 
-.negotiation{
-background:#8b5cf6;
+.row-confirmed{
+background:#124d2f;
 }
 
-.confirmed{
-background:#22c55e;
+.row-other{
+background:#1e293b;
 }
 
-.other{
-background:#64748b;
+/* HOVER */
+
+tr:hover{
+background:#475569;
+transition:.15s;
 }
-
-/* ROW COLORS */
-
-.row-waiting{background:rgba(245,158,11,0.08);}
-.row-docs{background:rgba(59,130,246,0.08);}
-.row-negotiation{background:rgba(139,92,246,0.08);}
-.row-confirmed{background:rgba(34,197,94,0.08);}
 
 .company{
 font-weight:600;
@@ -132,9 +123,9 @@ let allData=[];
 
 function load(){
 
-const s=document.createElement("script");
-s.src=API_URL+"?callback=handleData&_="+Date.now();
-document.body.appendChild(s);
+const script=document.createElement("script");
+script.src=API_URL+"?callback=handleData&_="+Date.now();
+document.body.appendChild(script);
 
 }
 
@@ -177,8 +168,12 @@ function getStatusClass(status){
 const s=status.toLowerCase();
 
 if(s.includes("aláír")) return "waiting";
+
 if(s.includes("dokument")) return "docs";
-if(s.includes("termék") || s.includes("beszél")) return "negotiation";
+
+if(s.includes("termék") || s.includes("beszél") || s.includes("discussion"))
+return "negotiation";
+
 if(s.includes("confirm")) return "confirmed";
 
 return "other";
@@ -193,17 +188,13 @@ let html="";
 
 rows.forEach(p=>{
 
-const c=getStatusClass(p.status);
+const statusClass=getStatusClass(p.status);
 
 html+=`
 
-<tr class="row-${c}">
+<tr class="row-${statusClass}">
 
-<td>
-<span class="badge ${c}">
-${p.status}
-</span>
-</td>
+<td>${p.status}</td>
 
 <td class="company">${p.company}</td>
 
