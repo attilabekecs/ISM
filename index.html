@@ -196,6 +196,19 @@ color:white;
 text-align:center;
 }
 
+.whatsapp-btn{
+width:100%;
+padding:16px;
+border:none;
+border-radius:16px;
+font-weight:600;
+cursor:pointer;
+font-size:1rem;
+margin-top:15px;
+background:#38bdf8;
+color:white;
+}
+
 </style>
 </head>
 
@@ -275,7 +288,7 @@ Close Scanner
 </button>
 
 <button class="scan" onclick="openWhatsAppUs()">
-💬 Contact Us on WhatsApp
+💬 Write to Attila on WhatsApp
 </button>
 
 </div>
@@ -522,19 +535,20 @@ document.getElementById("closeScanner").style.display = "none"
 function openWhatsAppContact(){
 
 const phone = document.getElementById("phone").value
-const name = document.getElementById("contact").value || "there"
 
 if(!phone){
 alert("No phone number available")
 return
 }
 
+const cleanPhone = phone.replace(/\D/g,'')
+
 const message = encodeURIComponent(
-"Hello " + name + ", nice meeting you. Let's discuss business."
+"Hello, nice meeting you at ISM."
 )
 
 window.open(
-"https://wa.me/" + phone.replace(/\D/g,'') + "?text=" + message,
+"https://wa.me/" + cleanPhone + "?text=" + message,
 "_blank"
 )
 
