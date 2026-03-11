@@ -251,7 +251,7 @@ cursor:pointer;
 
 <div class="container">
 
-<h1>ISM v1.3</h1>
+<h1>ISM v1.4</h1>
 
 <button id="scanButton" class="scan" onclick="startScanner()">
 📷 Scan Contact QR / vCard
@@ -469,6 +469,105 @@ window.open("https://wa.me/36304220151","_blank")
 
 function openWhatsAppNoe(){
 window.open("https://wa.me/36307353208","_blank")
+}
+
+function startScanner(){
+
+if(scanner){
+try{
+scanner.stop()
+}catch(e){}
+}
+
+document.getElementById("reader").style.display = "block"
+
+scanner = new Html5Qrcode("reader")
+
+document.getElementById("closeScanner").style.display = "block"
+
+scanner.start(
+
+{ facingMode:"environment" },
+
+{ fps:10, qrbox:250 },
+
+(decodedText) => {
+
+parseContact(decodedText)
+
+scanner.stop()
+
+document.getElementById("reader").style.display = "none"
+document.getElementById("closeScanner").style.display = "none"
+
+overlay.style.display = "flex"
+overlay.querySelector(".loader-box").innerText = "Contact imported"
+
+setTimeout(()=>{
+overlay.style.display = "none"
+},800)
+
+}
+
+)
+
+}
+
+function parseContact(text){
+
+if(text.includes("BEGIN:VCARD")){
+
+const name = text.match(/FN:(.*)/)?.[1] || ""
+const company = text.match(/ORG:(.*)/)?.[1] || ""
+const phone = text.match(/TEL[^:]*:(.*)/)?.[1] || ""
+const email = text.match(/EMAIL[^:]*:(.*)/)?.[1] || ""
+
+const adr = text.match(/ADR:(.*)/)?.[1] || ""
+const country = adr.split(";")[6] || ""
+
+fillFields(name, company, phone, email)
+
+if(country){
+document.getElementById("country").value = country
+}
+
+return
+
+}
+
+if(text.startsWith("MECARD:")){
+
+const name = text.match(/N:([^;]*)/)?.[1] || ""
+const company = text.match(/ORG:([^;]*)/)?.[1] || ""
+const phone = text.match(/TEL:([^;]*)/)?.[1] || ""
+const email = text.match(/EMAIL:([^;]*)/)?.[1] || ""
+
+fillFields(name, company, phone, email)
+
+return
+
+}
+
+}
+
+function fillFields(name, company, phone, email){
+
+if(name) document.getElementById("contact").value = name
+if(company) document.getElementById("company").value = company
+if(phone) document.getElementById("phone").value = phone
+if(email) document.getElementById("email").value = email
+
+}
+
+document.getElementById("closeScanner").onclick = function(){
+
+if(scanner){
+scanner.stop()
+}
+
+document.getElementById("reader").style.display = "none"
+document.getElementById("closeScanner").style.display = "none"
+
 }
 
 </script>
