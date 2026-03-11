@@ -270,6 +270,14 @@ Close Scanner
 <button class="submit" onclick="submitForm()">Save</button>
 </div>
 
+<button class="scan" onclick="openWhatsAppContact()">
+💬 Write to Contact (WhatsApp)
+</button>
+
+<button class="scan" onclick="openWhatsAppUs()">
+💬 Contact Us on WhatsApp
+</button>
+
 </div>
 
 </div>
@@ -508,6 +516,41 @@ scanner.stop()
 
 document.getElementById("reader").style.display = "none"
 document.getElementById("closeScanner").style.display = "none"
+
+}
+
+function openWhatsAppContact(){
+
+const phone = document.getElementById("phone").value
+const name = document.getElementById("contact").value || "there"
+
+if(!phone){
+alert("No phone number available")
+return
+}
+
+const message = encodeURIComponent(
+"Hello " + name + ", nice meeting you. Let's discuss business."
+)
+
+window.open(
+"https://wa.me/" + phone.replace(/\D/g,'') + "?text=" + message,
+"_blank"
+)
+
+}
+
+function openWhatsAppUs(){
+
+const ourNumber = "36304220151"
+const message = encodeURIComponent(
+"Hello, I would like to discuss cooperation."
+)
+
+window.open(
+"https://wa.me/" + ourNumber + "?text=" + message,
+"_blank"
+)
 
 }
 
