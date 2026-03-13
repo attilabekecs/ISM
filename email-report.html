@@ -290,24 +290,32 @@ load();
 
 setInterval(load,15000);
 
-/* COPY CLEAN TABLE */
+/* COPY WITH COLORS */
 
 function copyTable(type){
 
-let table;
-let title;
+let table=document.getElementById(type+"Table").cloneNode(true);
 
-if(type==="export"){
-table=document.getElementById("exportTable").outerHTML;
-title="<h3>Export Partners</h3>";
-}
+/* INLINE COLORS */
 
-if(type==="import"){
-table=document.getElementById("importTable").outerHTML;
-title="<h3>Import Partners</h3>";
-}
+table.querySelectorAll("tr").forEach(row=>{
 
-const html=title+table;
+if(row.classList.contains("row-contract"))
+row.style.background="#facc15";
+
+if(row.classList.contains("row-discussion"))
+row.style.background="#1f4e79";
+
+if(row.classList.contains("row-inactive"))
+row.style.background="#7f2d2d";
+
+});
+
+let title = type==="export"
+? "<h3>Export Partners</h3>"
+: "<h3>Import Partners</h3>";
+
+const html = title + table.outerHTML;
 
 navigator.clipboard.write([
 new ClipboardItem({
