@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 <head>
 <meta charset="UTF-8">
@@ -20,8 +21,9 @@ max-width:1400px;
 margin:auto;
 }
 
-h1{
-margin-bottom:25px;
+h2{
+margin-top:40px;
+margin-bottom:15px;
 font-weight:700;
 }
 
@@ -33,6 +35,7 @@ border-collapse:collapse;
 background:#1e293b;
 border-radius:12px;
 overflow:hidden;
+margin-bottom:40px;
 }
 
 thead{
@@ -61,26 +64,18 @@ line-height:1.4;
 
 /* STATUS COLORS */
 
-/* SZERZŐDÉS FOLYAMATBAN */
-
 .row-contract{
 background:#facc15;
 color:#000;
 }
 
-/* TERMÉKEKET BESZÉLJÜK */
-
 .row-discussion{
 background:#1f4e79;
 }
 
-/* NEM AKTÍV */
-
 .row-inactive{
 background:#7f2d2d;
 }
-
-/* Egyéb */
 
 .row-other{
 background:#1e293b;
@@ -99,6 +94,7 @@ font-weight:600;
 
 .copy-btn{
 margin-bottom:20px;
+margin-right:10px;
 padding:10px 16px;
 border:none;
 border-radius:8px;
@@ -113,16 +109,18 @@ background:#0ea5e9;
 }
 
 </style>
+
 </head>
 
 <body>
 
 <div class="wrapper">
 
-<button onclick="copyTable()" class="copy-btn">Copy table</button>
+<button onclick="copyTable('exportTable')" class="copy-btn">Copy Export Table</button> <button onclick="copyTable('importTable')" class="copy-btn">Copy Import Table</button>
 
-<table id="statusTable">
-  
+<h2>Export Partners</h2>
+
+<table id="exportTable">
 <thead>
 <tr>
 <th>Status</th>
@@ -135,9 +133,25 @@ background:#0ea5e9;
 <th>Status Date</th>
 </tr>
 </thead>
+<tbody id="exportBody"></tbody>
+</table>
 
-<tbody id="tableBody"></tbody>
+<h2>Import Partners</h2>
 
+<table id="importTable">
+<thead>
+<tr>
+<th>Status</th>
+<th>Company</th>
+<th>Contact</th>
+<th>Country</th>
+<th>Type</th>
+<th>Phone</th>
+<th>Brands</th>
+<th>Status Date</th>
+</tr>
+</thead>
+<tbody id="importBody"></tbody>
 </table>
 
 </div>
@@ -188,9 +202,9 @@ country:r.Country||"",
 phone:r.Phone||"",
 brands:r.Brands||"",
 type:formatType(r.Type||""),
+originalType:(r.Type||""),
 status:r["Státusz"]||"",
-statusDate:r["Státusz változás"]||"",
-originalType:(r.Type||"")
+statusDate:r["Státusz változás"]||""
 };
 
 }
@@ -217,7 +231,7 @@ const t=type.toLowerCase();
 if(t.includes("seller") && (s.includes("aktív") || s.includes("active")))
 return "contract";
 
-/* SZERZŐDÉS FOLYAMATBAN */
+/* SZERZŐDÉS */
 
 if(s.includes("szerződés"))
 return "contract";
@@ -240,39 +254,42 @@ function render(){
 
 const rows=allData.map(normalize);
 
-let html="";
+let exportHTML="";
+let importHTML="";
 
 rows.forEach(p=>{
 
 const statusClass=getStatusClass(p.status,p.originalType);
 
-html+=`
+const row=`
 
 <tr class="row-${statusClass}">
 
 <td>${p.status}</td>
-
 <td class="company">${p.company}</td>
-
 <td>${p.contact}</td>
-
 <td>${p.country}</td>
-
 <td>${p.type}</td>
-
 <td>${p.phone}</td>
-
 <td class="brands">${p.brands}</td>
-
 <td>${formatDate(p.statusDate)}</td>
 
 </tr>
 
 `;
 
+if(p.originalType.toLowerCase().includes("buyer")){
+exportHTML+=row;
+}
+
+if(p.originalType.toLowerCase().includes("seller")){
+importHTML+=row;
+}
+
 });
 
-document.getElementById("tableBody").innerHTML=html;
+document.getElementById("exportBody").innerHTML=exportHTML;
+document.getElementById("importBody").innerHTML=importHTML;
 
 }
 
@@ -284,9 +301,9 @@ load();
 
 }, 15000);
 
-function copyTable(){
+function copyTable(id){
 
-const table=document.getElementById("statusTable");
+const table=document.getElementById(id);
 
 const range=document.createRange();
 range.selectNode(table);
