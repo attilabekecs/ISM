@@ -507,12 +507,36 @@ function copyTable(type){
 
 let table=document.getElementById(type+"Table");
 
-let title = type==="export" ? "Export Partners\n\n" : "Import Partners\n\n";
+let title = document.createElement("tr");
+let cell = document.createElement("td");
 
-let text = title + table.innerText;
+cell.colSpan = table.rows[0].cells.length;
+cell.style.fontWeight = "700";
+cell.style.textAlign = "left";
+cell.style.background = "#0f172a";
+cell.style.color = "white";
 
-navigator.clipboard.writeText(text);
+cell.innerText = type==="export" ? "Export Partners" : "Import Partners";
 
+title.appendChild(cell);
+
+let tbody = table.querySelector("tbody");
+table.insertBefore(title, tbody);
+
+const range=document.createRange();
+range.selectNode(table);
+
+const selection=window.getSelection();
+selection.removeAllRanges();
+selection.addRange(range);
+
+document.execCommand("copy");
+
+selection.removeAllRanges();
+
+title.remove();
+
+}
 }
 
 </script>
