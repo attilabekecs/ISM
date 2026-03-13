@@ -137,7 +137,7 @@ opacity:.9;
 .partner-brands{
 display:flex;
 flex-wrap:wrap;
-gap:12px;
+gap:6px;
 align-content:flex-start;
 }
 
@@ -409,7 +409,11 @@ exportHTML+=`
 <td>${p.contact}</td>
 <td>${p.country}</td>
 <td>${p.phone}</td>
-<td>${formatBrands(p.brands)}</td>
+<td>
+<div class="partner-brands">
+${formatBrands(p.brands)}
+</div>
+</td>
 </tr>
 
 `;
