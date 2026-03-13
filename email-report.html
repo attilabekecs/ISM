@@ -27,8 +27,6 @@ margin-bottom:15px;
 font-weight:700;
 }
 
-/* TABLE */
-
 table{
 width:100%;
 border-collapse:collapse;
@@ -62,8 +60,6 @@ max-width:350px;
 line-height:1.4;
 }
 
-/* STATUS COLORS */
-
 .row-contract{
 background:#facc15;
 color:#000;
@@ -79,13 +75,6 @@ background:#7f2d2d;
 
 .row-other{
 background:#1e293b;
-}
-
-/* Hover */
-
-tr:hover{
-background:#475569;
-transition:.15s;
 }
 
 .company{
@@ -116,13 +105,11 @@ background:#0ea5e9;
 
 <div class="wrapper">
 
-<button onclick="copyBlock('exportBlock')" class="copy-btn">Copy Export Table</button> <button onclick="copyBlock('importBlock')" class="copy-btn">Copy Import Table</button>
-
-<div id="exportBlock">
+<button onclick="copyTable('export')" class="copy-btn">Copy Export Table</button> <button onclick="copyTable('import')" class="copy-btn">Copy Import Table</button>
 
 <h2>Export Partners</h2>
 
-<table>
+<table id="exportTable">
 <thead>
 <tr>
 <th>Status</th>
@@ -137,13 +124,9 @@ background:#0ea5e9;
 <tbody id="exportBody"></tbody>
 </table>
 
-</div>
-
-<div id="importBlock">
-
 <h2>Import Partners</h2>
 
-<table>
+<table id="importTable">
 <thead>
 <tr>
 <th>Status</th>
@@ -157,8 +140,6 @@ background:#0ea5e9;
 </thead>
 <tbody id="importBody"></tbody>
 </table>
-
-</div>
 
 </div>
 
@@ -215,18 +196,13 @@ function getStatusClass(status){
 const s=status.toLowerCase();
 
 if(s.includes("szerződés")) return "contract";
-
 if(s.includes("termék")) return "discussion";
-
 if(s.includes("nem aktív") || s.includes("inactive")) return "inactive";
-
 if(s.includes("aktív") || s.includes("active")) return "contract";
 
 return "other";
 
 }
-
-/* BUYER SORT */
 
 function buyerPriority(status){
 
@@ -240,8 +216,6 @@ if(s.includes("nem aktív")) return 4;
 return 5;
 
 }
-
-/* SELLER SORT */
 
 function sellerPriority(status){
 
@@ -316,22 +290,32 @@ load();
 
 setInterval(load,15000);
 
-function copyBlock(id){
+/* COPY CLEAN TABLE */
 
-const block=document.getElementById(id);
+function copyTable(type){
 
-const range=document.createRange();
-range.selectNode(block);
+let table;
+let title;
 
-const selection=window.getSelection();
-selection.removeAllRanges();
-selection.addRange(range);
+if(type==="export"){
+table=document.getElementById("exportTable").outerHTML;
+title="<h3>Export Partners</h3>";
+}
 
-document.execCommand("copy");
+if(type==="import"){
+table=document.getElementById("importTable").outerHTML;
+title="<h3>Import Partners</h3>";
+}
 
-selection.removeAllRanges();
+const html=title+table;
 
-alert("Copied with title.");
+navigator.clipboard.write([
+new ClipboardItem({
+"text/html": new Blob([html], {type:"text/html"})
+})
+]);
+
+alert("Table copied");
 
 }
 
