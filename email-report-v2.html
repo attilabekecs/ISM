@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
 <head>
 <meta charset="UTF-8">
@@ -26,10 +25,11 @@ display:flex;
 gap:10px;
 align-items:center;
 margin-bottom:20px;
-
 position:sticky;
 top:0;
 z-index:100;
+background:#0f172a;
+padding:10px 0;
 }
 
 .search{
@@ -67,17 +67,11 @@ font-weight:600;
 }
 
 td{
-padding:14px;
+padding:0;
 font-size:13px;
-border-top:1px solid rgba(255,255,255,.05);
-white-space:nowrap;
 }
 
-td.brands{
-white-space:normal;
-max-width:350px;
-line-height:1.4;
-}
+/* row colors */
 
 .row-contract{
 background:#facc15;
@@ -96,9 +90,77 @@ background:#7f2d2d;
 background:#1e293b;
 }
 
-.company{
-font-weight:600;
+/* partner layout */
+
+.partner-row{
+display:grid;
+grid-template-columns:320px 1fr;
+gap:16px;
+padding:14px;
+border-bottom:2px solid #0f172a;
 }
+
+.partner-info{
+background:#0f172a;
+padding:14px;
+border-radius:10px;
+display:flex;
+flex-direction:column;
+gap:6px;
+}
+
+.partner-top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.partner-company{
+font-weight:700;
+font-size:14px;
+}
+
+.partner-country{
+font-size:12px;
+opacity:.7;
+}
+
+.partner-contact{
+font-size:13px;
+}
+
+.partner-phone{
+font-size:13px;
+opacity:.9;
+}
+
+.partner-brands{
+display:flex;
+flex-wrap:wrap;
+gap:6px;
+align-content:flex-start;
+}
+
+/* brand tags */
+
+.brand-tag{
+background:#0f172a;
+border:1px solid rgba(255,255,255,.12);
+padding:6px 10px;
+border-radius:8px;
+font-size:12px;
+display:inline-flex;
+align-items:center;
+gap:6px;
+color:white;
+}
+
+.brand-price{
+color:#38bdf8;
+font-weight:700;
+}
+
+/* buttons */
 
 .copy-btn{
 padding:10px 16px;
@@ -122,10 +184,11 @@ border-radius:6px;
 text-decoration:none;
 font-size:12px;
 font-weight:600;
+display:inline-block;
+margin-top:6px;
 }
 
 </style>
-
 </head>
 
 <body>
@@ -153,12 +216,7 @@ id="searchInput"
 <thead>
 <tr>
 <th>Status</th>
-<th>Company</th>
-<th>Contact</th>
-<th>Country</th>
-<th>Phone</th>
-<th>Brands</th>
-<th>Status Date</th>
+<th>Partner</th>
 </tr>
 </thead>
 <tbody id="exportBody"></tbody>
@@ -170,12 +228,7 @@ id="searchInput"
 <thead>
 <tr>
 <th>Status</th>
-<th>Company</th>
-<th>Contact</th>
-<th>Country</th>
-<th>Phone</th>
-<th>Brands</th>
-<th>WhatsApp offers</th>
+<th>Partner</th>
 </tr>
 </thead>
 <tbody id="importBody"></tbody>
@@ -283,6 +336,33 @@ return text.includes(term);
 
 }
 
+/* brand formatter */
+
+function formatBrands(text){
+
+if(!text) return "";
+
+let items = text.split(",").map(i=>i.trim());
+
+return items.map(item=>{
+
+let priceMatch = item.match(/(.*?)(\d+[.,]?\d*\s?€?)$/);
+
+if(priceMatch){
+
+let name = priceMatch[1].trim();
+let price = priceMatch[2].trim();
+
+return `<span class="brand-tag">${name} <span class="brand-price">${price}</span></span>`;
+
+}
+
+return `<span class="brand-tag">${item}</span>`;
+
+}).join("");
+
+}
+
 function render(){
 
 const search=document.getElementById("searchInput").value.toLowerCase();
@@ -290,7 +370,7 @@ const search=document.getElementById("searchInput").value.toLowerCase();
 let rows=allData.map(normalize);
 
 if(search){
-rows = rows.filter(p=>matchSearch(p,search));
+rows=rows.filter(p=>matchSearch(p,search));
 }
 
 const buyers=rows.filter(r=>r.type.toLowerCase().includes("buyer"));
@@ -302,46 +382,94 @@ sellers.sort((a,b)=>sellerPriority(a.status)-sellerPriority(b.status));
 let exportHTML="";
 let importHTML="";
 
+/* EXPORT */
+
 buyers.forEach(p=>{
 
 const statusClass=getStatusClass(p.status);
+
+let whatsappHTML="";
+
+if(p.statusDate){
+whatsappHTML=`<a href="${p.statusDate}" target="_blank" class="wa-btn">WhatsApp Channel offers</a>`;
+}
 
 exportHTML+=`
 
 <tr class="row-${statusClass}">
 <td>${p.status}</td>
-<td class="company">${p.company}</td>
-<td>${p.contact}</td>
-<td>${p.country}</td>
-<td>${p.phone}</td>
-<td class="brands">${p.brands}</td>
-<td>${formatDate(p.statusDate)}</td>
+<td>
+
+<div class="partner-row">
+
+<div class="partner-info">
+
+<div class="partner-top">
+<div class="partner-company">${p.company}</div>
+<div class="partner-country">${p.country}</div>
+</div>
+
+<div class="partner-contact">${p.contact}</div>
+<div class="partner-phone">${p.phone}</div>
+
+${whatsappHTML}
+
+</div>
+
+<div class="partner-brands">
+${formatBrands(p.brands)}
+</div>
+
+</div>
+
+</td>
 </tr>
 
 `;
 
 });
 
+/* IMPORT */
+
 sellers.forEach(p=>{
 
 const statusClass=getStatusClass(p.status);
 
-let whatsappLink = "";
+let whatsappHTML="";
 
 if(p.statusDate){
-whatsappLink = `<a href="${p.statusDate}" target="_blank" class="wa-btn">Open WhatsApp</a>`;
+whatsappHTML=`<a href="${p.statusDate}" target="_blank" class="wa-btn">WhatsApp Channel offers</a>`;
 }
 
 importHTML+=`
 
 <tr class="row-${statusClass}">
 <td>${p.status}</td>
-<td class="company">${p.company}</td>
-<td>${p.contact}</td>
-<td>${p.country}</td>
-<td>${p.phone}</td>
-<td class="brands">${p.brands}</td>
-<td>${whatsappLink}</td>
+<td>
+
+<div class="partner-row">
+
+<div class="partner-info">
+
+<div class="partner-top">
+<div class="partner-company">${p.company}</div>
+<div class="partner-country">${p.country}</div>
+</div>
+
+<div class="partner-contact">${p.contact}</div>
+<div class="partner-phone">${p.phone}</div>
+
+${whatsappHTML}
+
+</div>
+
+<div class="partner-brands">
+${formatBrands(p.brands)}
+</div>
+
+</div>
+
+</td>
 </tr>
 
 `;
@@ -361,23 +489,8 @@ function copyTable(type){
 
 let table=document.getElementById(type+"Table");
 
-let title=document.createElement("div");
-
-title.style.background="none";
-title.style.fontSize="20px";
-title.style.fontWeight="700";
-title.style.marginBottom="10px";
-title.style.color="black";
-
-title.innerText = type==="export"
-? "Export Partners"
-: "Import Partners";
-
-table.parentNode.insertBefore(title,table);
-
 const range=document.createRange();
-range.setStartBefore(title);
-range.setEndAfter(table);
+range.selectNode(table);
 
 const selection=window.getSelection();
 selection.removeAllRanges();
@@ -386,8 +499,6 @@ selection.addRange(range);
 document.execCommand("copy");
 
 selection.removeAllRanges();
-
-title.remove();
 
 }
 
