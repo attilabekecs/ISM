@@ -217,7 +217,12 @@ font-weight:600;
 background:#16a34a;
 color:white;
 }
-
+.highlight{
+background:#facc15;
+color:#000;
+padding:2px 4px;
+border-radius:4px;
+}
 </style>
 </head>
 
@@ -359,6 +364,15 @@ p.status
 return text.includes(term);
 
 }
+function highlight(text,term){
+
+if(!term) return text;
+
+const regex = new RegExp(`(${term})`, "gi");
+
+return text.replace(regex,'<span class="highlight">$1</span>');
+
+}
 
 /* brand formatter */
 
@@ -415,11 +429,11 @@ const statusClass=getStatusClass(p.status);
 exportHTML+=`
 
 <tr class="row-${statusClass}">
-<td>${p.status}</td>
-<td class="company">${p.company}</td>
-<td>${p.contact}</td>
-<td>${p.country}</td>
-<td>${p.phone}</td>
+<td>${highlight(p.status,search)}</td>
+<td class="company">${highlight(p.company,search)}</td>
+<td>${highlight(p.contact,search)}</td>
+<td>${highlight(p.country,search)}</td>
+<td>${highlight(p.phone,search)}</td>
 <td>
 <div class="partner-brands">
 ${formatBrands(p.brands)}
@@ -446,7 +460,7 @@ whatsappHTML=`<a href="${p.statusDate}" target="_blank" class="wa-btn">WhatsApp 
 importHTML+=`
 
 <tr class="row-${statusClass}">
-<td>${p.status}</td>
+<td>${highlight(p.status,search)}</td>
 <td>
 
 <div class="partner-row">
@@ -454,12 +468,12 @@ importHTML+=`
 <div class="partner-info">
 
 <div class="partner-top">
-<div class="partner-company">${p.company}</div>
-<div class="partner-country">${p.country}</div>
+<div class="partner-company">${highlight(p.company,search)}</div>
+<div class="partner-country">${highlight(p.country,search)}</div>
 </div>
 
-<div class="partner-contact">${p.contact}</div>
-<div class="partner-phone">${p.phone}</div>
+<div class="partner-contact">${highlight(p.contact,search)}</div>
+<div class="partner-phone">${highlight(p.phone,search)}</div>
 
 ${whatsappHTML}
 
