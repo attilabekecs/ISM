@@ -297,9 +297,16 @@ function copyTable(type){
 let table=document.getElementById(type+"Table");
 
 let title=document.createElement("div");
-title.innerHTML = type==="export"
-? "<strong>Export Partners</strong><br><br>"
-: "<strong>Import Partners</strong><br><br>";
+
+title.style.background="none";
+title.style.fontSize="20px";
+title.style.fontWeight="700";
+title.style.marginBottom="10px";
+title.style.color="black";
+
+title.innerText = type==="export"
+? "Export Partners"
+: "Import Partners";
 
 table.parentNode.insertBefore(title,table);
 
