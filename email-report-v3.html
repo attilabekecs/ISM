@@ -25,11 +25,9 @@ display:flex;
 gap:10px;
 align-items:center;
 margin-bottom:20px;
-
 position:sticky;
 top:0;
 z-index:100;
-
 background:#0f172a;
 padding:10px 0;
 }
@@ -77,10 +75,10 @@ white-space:nowrap;
 
 td.brands{
 white-space:normal;
-max-width:380px;
+max-width:420px;
 }
 
-/* PRODUCT TAGS */
+/* PRODUCT BOXES */
 
 .brands{
 display:flex;
@@ -89,32 +87,24 @@ gap:6px;
 }
 
 .brand-tag{
-background:#020617;
-border:1px solid rgba(255,255,255,.08);
+background:#0f172a;
+border:1px solid rgba(255,255,255,.12);
 padding:6px 10px;
 border-radius:8px;
 font-size:12px;
 display:inline-flex;
 align-items:center;
 gap:6px;
+color:white;
 }
 
 .brand-tag:hover{
-background:#0f172a;
 border-color:#38bdf8;
 }
 
 .brand-price{
 color:#38bdf8;
 font-weight:700;
-}
-
-.brand-more{
-background:#334155;
-padding:6px 10px;
-border-radius:8px;
-font-size:12px;
-cursor:pointer;
 }
 
 /* STATUS COLORS */
@@ -322,41 +312,30 @@ return text.includes(term);
 
 }
 
-/* PRODUCT FORMATTER */
+/* PRODUCT FORMAT */
 
 function formatBrands(text){
 
 if(!text) return "";
 
-let items=text.split(",").map(i=>i.trim());
+let items = text.split(",").map(i=>i.trim());
 
-let visible=items.slice(0,3);
-let hidden=items.slice(3);
+return items.map(item=>{
 
-let html=visible.map(item=>{
-
-let priceMatch=item.match(/(.*?)(\d+[.,]?\d*)$/);
+let priceMatch = item.match(/(.*?)(\d+[.,]?\d*)$/);
 
 if(priceMatch){
 
-let name=priceMatch[1].trim();
-let price=priceMatch[2];
+let name = priceMatch[1].trim();
+let price = priceMatch[2];
 
-return `<span class="brand-tag">${name}<span class="brand-price">${price}</span></span>`;
+return `<span class="brand-tag">${name} <span class="brand-price">${price}</span></span>`;
 
 }
 
 return `<span class="brand-tag">${item}</span>`;
 
 }).join("");
-
-if(hidden.length){
-
-html+=`<span class="brand-more" title="${hidden.join(", ")}">+${hidden.length} more</span>`;
-
-}
-
-return html;
 
 }
 
