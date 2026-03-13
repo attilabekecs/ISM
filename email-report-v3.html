@@ -73,8 +73,8 @@ border-top:1px solid rgba(255,255,255,.08);
 white-space:nowrap;
 }
 
-tbody tr:not(:first-child) td{
-border-top:1px solid rgba(255,255,255,.12);
+tbody tr{
+border-bottom:1px solid rgba(0,0,0,.15);
 }
 
 td.brands{
@@ -390,7 +390,7 @@ const statusClass=getStatusClass(p.status);
 let companyHTML = `<div class="company">${p.company}</div>`;
 
 if(p.statusDate){
-companyHTML += `<a href="${p.statusDate}" target="_blank" class="wa-btn">WhatsApp</a>`;
+companyHTML += `<a href="${p.statusDate}" target="_blank" class="wa-btn">WhatsApp Channel offers</a>`;
 }
 
 importHTML+=`
