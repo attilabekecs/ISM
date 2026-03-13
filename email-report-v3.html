@@ -322,7 +322,7 @@ let items = text.split(",").map(i=>i.trim());
 
 return items.map(item=>{
 
-let priceMatch = item.match(/(.*?)(\d+[.,]?\d*)$/);
+let priceMatch = item.match(/(.*?)(\d+[.,]?\d*\s?€?)$/);
 
 if(priceMatch){
 
