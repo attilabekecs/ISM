@@ -177,17 +177,14 @@ render();
 
 }
 
-/* Buyer / Seller átalakítás */
+/* Buyer / Seller */
 
 function formatType(type){
 
 const t=type.toLowerCase();
 
-if(t.includes("buyer"))
-return "Export";
-
-if(t.includes("seller"))
-return "Import";
+if(t.includes("buyer")) return "Export";
+if(t.includes("seller")) return "Import";
 
 return type;
 
@@ -221,27 +218,40 @@ return date.toISOString().split("T")[0];
 
 }
 
+/* FLAG */
+
+function getFlag(country){
+
+const c=country.toLowerCase();
+
+if(c.includes("hungary")) return "🇭🇺 Hungary";
+if(c.includes("italy")) return "🇮🇹 Italy";
+if(c.includes("spain")) return "🇪🇸 Spain";
+if(c.includes("france")) return "🇫🇷 France";
+if(c.includes("germany")) return "🇩🇪 Germany";
+if(c.includes("poland")) return "🇵🇱 Poland";
+if(c.includes("uk")) return "🇬🇧 UK";
+if(c.includes("united states") || c.includes("usa")) return "🇺🇸 USA";
+
+return country;
+
+}
+
+/* STATUS CLASS */
+
 function getStatusClass(status,type){
 
 const s=status.toLowerCase();
 const t=type.toLowerCase();
 
-/* Seller + Active -> sárga */
-
 if(t.includes("seller") && (s.includes("aktív") || s.includes("active")))
 return "contract";
-
-/* SZERZŐDÉS */
 
 if(s.includes("szerződés"))
 return "contract";
 
-/* TERMÉK BESZÉLGETÉS */
-
 if(s.includes("termék") || s.includes("beszél"))
 return "discussion";
-
-/* NEM AKTÍV */
 
 if(s.includes("nem aktív") || s.includes("inactive"))
 return "inactive";
@@ -250,9 +260,27 @@ return "other";
 
 }
 
+/* SORT PRIORITY */
+
+function getPriority(status){
+
+const s=status.toLowerCase();
+
+if(s.includes("szerződés") || s.includes("active") || s.includes("aktív")) return 1;
+if(s.includes("termék") || s.includes("beszél")) return 2;
+if(s.includes("nem aktív") || s.includes("inactive")) return 4;
+
+return 3;
+
+}
+
 function render(){
 
 const rows=allData.map(normalize);
+
+/* SORT */
+
+rows.sort((a,b)=>getPriority(a.status)-getPriority(b.status));
 
 let exportHTML="";
 let importHTML="";
@@ -268,7 +296,7 @@ const row=`
 <td>${p.status}</td>
 <td class="company">${p.company}</td>
 <td>${p.contact}</td>
-<td>${p.country}</td>
+<td>${getFlag(p.country)}</td>
 <td>${p.type}</td>
 <td>${p.phone}</td>
 <td class="brands">${p.brands}</td>
@@ -299,7 +327,7 @@ setInterval(() => {
 
 load();
 
-}, 15000);
+},15000);
 
 function copyTable(id){
 
