@@ -67,7 +67,7 @@ font-weight:600;
 }
 
 td{
-padding:0;
+padding:14px;
 font-size:13px;
 }
 
@@ -90,7 +90,7 @@ background:#7f2d2d;
 background:#1e293b;
 }
 
-/* partner layout */
+/* seller partner card layout */
 
 .partner-row{
 display:grid;
@@ -118,24 +118,20 @@ align-items:center;
 .partner-company{
 font-weight:700;
 font-size:14px;
-color:white;
-}
-
-.partner-contact{
-font-size:13px;
-color:white;
-}
-
-.partner-phone{
-font-size:13px;
-opacity:.9;
-color:white;
 }
 
 .partner-country{
 font-size:12px;
 opacity:.7;
-color:white;
+}
+
+.partner-contact{
+font-size:13px;
+}
+
+.partner-phone{
+font-size:13px;
+opacity:.9;
 }
 
 .partner-brands{
@@ -162,6 +158,10 @@ color:white;
 .brand-price{
 color:#38bdf8;
 font-weight:700;
+}
+
+.brand-tag:hover{
+border-color:#38bdf8;
 }
 
 /* buttons */
@@ -192,6 +192,8 @@ display:inline-block;
 margin-top:6px;
 }
 
+/* status column */
+
 #exportTable td:first-child,
 #importTable td:first-child{
 text-align:center;
@@ -200,7 +202,11 @@ font-weight:600;
 }
 
 tbody tr{
-border-bottom:2px solid #0f172a;
+border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+.company{
+font-weight:600;
 }
 
 </style>
@@ -231,7 +237,11 @@ id="searchInput"
 <thead>
 <tr>
 <th>Status</th>
-<th>Partner</th>
+<th>Company</th>
+<th>Contact</th>
+<th>Country</th>
+<th>Phone</th>
+<th>Brands</th>
 </tr>
 </thead>
 <tbody id="exportBody"></tbody>
@@ -284,18 +294,6 @@ type:(r.Type||""),
 status:r["Státusz"]||"",
 statusDate:r["Státusz változás"]||""
 };
-
-}
-
-function formatDate(d){
-
-if(!d) return "";
-
-const date=new Date(d);
-
-if(isNaN(date)) return d;
-
-return date.toISOString().split("T")[0];
 
 }
 
@@ -397,54 +395,28 @@ sellers.sort((a,b)=>sellerPriority(a.status)-sellerPriority(b.status));
 let exportHTML="";
 let importHTML="";
 
-/* EXPORT */
+/* BUYERS (table layout) */
 
 buyers.forEach(p=>{
 
 const statusClass=getStatusClass(p.status);
 
-let whatsappHTML="";
-
-if(p.statusDate){
-whatsappHTML=`<a href="${p.statusDate}" target="_blank" class="wa-btn">WhatsApp Channel offers</a>`;
-}
-
 exportHTML+=`
 
 <tr class="row-${statusClass}">
 <td>${p.status}</td>
-<td>
-
-<div class="partner-row">
-
-<div class="partner-info">
-
-<div class="partner-top">
-<div class="partner-company">${p.company}</div>
-<div class="partner-country">${p.country}</div>
-</div>
-
-<div class="partner-contact">${p.contact}</div>
-<div class="partner-phone">${p.phone}</div>
-
-${whatsappHTML}
-
-</div>
-
-<div class="partner-brands">
-${formatBrands(p.brands)}
-</div>
-
-</div>
-
-</td>
+<td class="company">${p.company}</td>
+<td>${p.contact}</td>
+<td>${p.country}</td>
+<td>${p.phone}</td>
+<td>${formatBrands(p.brands)}</td>
 </tr>
 
 `;
 
 });
 
-/* IMPORT */
+/* SELLERS (card layout) */
 
 sellers.forEach(p=>{
 
