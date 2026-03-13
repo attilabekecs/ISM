@@ -27,8 +27,6 @@ margin-bottom:15px;
 font-weight:700;
 }
 
-/* TABLE */
-
 table{
 width:100%;
 border-collapse:collapse;
@@ -62,8 +60,6 @@ max-width:350px;
 line-height:1.4;
 }
 
-/* STATUS COLORS */
-
 .row-contract{
 background:#facc15;
 color:#000;
@@ -80,8 +76,6 @@ background:#7f2d2d;
 .row-other{
 background:#1e293b;
 }
-
-/* Hover */
 
 tr:hover{
 background:#475569;
@@ -177,8 +171,6 @@ render();
 
 }
 
-/* Buyer / Seller */
-
 function formatType(type){
 
 const t=type.toLowerCase();
@@ -218,27 +210,6 @@ return date.toISOString().split("T")[0];
 
 }
 
-/* FLAG */
-
-function getFlag(country){
-
-const c=country.toLowerCase();
-
-if(c.includes("hungary")) return "🇭🇺 Hungary";
-if(c.includes("italy")) return "🇮🇹 Italy";
-if(c.includes("spain")) return "🇪🇸 Spain";
-if(c.includes("france")) return "🇫🇷 France";
-if(c.includes("germany")) return "🇩🇪 Germany";
-if(c.includes("poland")) return "🇵🇱 Poland";
-if(c.includes("uk")) return "🇬🇧 UK";
-if(c.includes("united states") || c.includes("usa")) return "🇺🇸 USA";
-
-return country;
-
-}
-
-/* STATUS CLASS */
-
 function getStatusClass(status,type){
 
 const s=status.toLowerCase();
@@ -250,7 +221,7 @@ return "contract";
 if(s.includes("szerződés"))
 return "contract";
 
-if(s.includes("termék") || s.includes("beszél"))
+if(s.includes("termék"))
 return "discussion";
 
 if(s.includes("nem aktív") || s.includes("inactive"))
@@ -260,15 +231,29 @@ return "other";
 
 }
 
-/* SORT PRIORITY */
+/* BUYER SORT */
 
-function getPriority(status){
+function buyerPriority(status){
 
 const s=status.toLowerCase();
 
-if(s.includes("szerződés") || s.includes("active") || s.includes("aktív")) return 1;
-if(s.includes("termék") || s.includes("beszél")) return 2;
-if(s.includes("nem aktív") || s.includes("inactive")) return 4;
+if(s.includes("szerződés")) return 1;
+if(s.includes("termék")) return 2;
+if(s.includes("drágák")) return 3;
+if(s.includes("nem aktív")) return 4;
+
+return 5;
+
+}
+
+/* SELLER SORT */
+
+function sellerPriority(status){
+
+const s=status.toLowerCase();
+
+if(s.includes("aktív") && !s.includes("nem")) return 1;
+if(s.includes("nem aktív")) return 2;
 
 return 3;
 
@@ -278,41 +263,54 @@ function render(){
 
 const rows=allData.map(normalize);
 
-/* SORT */
+const buyers=rows.filter(r=>r.originalType.toLowerCase().includes("buyer"));
+const sellers=rows.filter(r=>r.originalType.toLowerCase().includes("seller"));
 
-rows.sort((a,b)=>getPriority(a.status)-getPriority(b.status));
+buyers.sort((a,b)=>buyerPriority(a.status)-buyerPriority(b.status));
+sellers.sort((a,b)=>sellerPriority(a.status)-sellerPriority(b.status));
 
 let exportHTML="";
 let importHTML="";
 
-rows.forEach(p=>{
+buyers.forEach(p=>{
 
 const statusClass=getStatusClass(p.status,p.originalType);
 
-const row=`
+exportHTML+=`
 
 <tr class="row-${statusClass}">
-
 <td>${p.status}</td>
 <td class="company">${p.company}</td>
 <td>${p.contact}</td>
-<td>${getFlag(p.country)}</td>
+<td>${p.country}</td>
 <td>${p.type}</td>
 <td>${p.phone}</td>
 <td class="brands">${p.brands}</td>
 <td>${formatDate(p.statusDate)}</td>
-
 </tr>
 
 `;
 
-if(p.originalType.toLowerCase().includes("buyer")){
-exportHTML+=row;
-}
+});
 
-if(p.originalType.toLowerCase().includes("seller")){
-importHTML+=row;
-}
+sellers.forEach(p=>{
+
+const statusClass=getStatusClass(p.status,p.originalType);
+
+importHTML+=`
+
+<tr class="row-${statusClass}">
+<td>${p.status}</td>
+<td class="company">${p.company}</td>
+<td>${p.contact}</td>
+<td>${p.country}</td>
+<td>${p.type}</td>
+<td>${p.phone}</td>
+<td class="brands">${p.brands}</td>
+<td>${formatDate(p.statusDate)}</td>
+</tr>
+
+`;
 
 });
 
@@ -323,11 +321,7 @@ document.getElementById("importBody").innerHTML=importHTML;
 
 load();
 
-setInterval(() => {
-
-load();
-
-},15000);
+setInterval(load,15000);
 
 function copyTable(id){
 
