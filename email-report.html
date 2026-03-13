@@ -290,38 +290,32 @@ load();
 
 setInterval(load,15000);
 
-/* COPY WITH COLORS */
+/* COPY LIKE MANUAL SELECTION */
 
 function copyTable(type){
 
-let table=document.getElementById(type+"Table").cloneNode(true);
+let table=document.getElementById(type+"Table");
 
-/* INLINE COLORS */
+let title=document.createElement("div");
+title.innerHTML = type==="export"
+? "<strong>Export Partners</strong><br><br>"
+: "<strong>Import Partners</strong><br><br>";
 
-table.querySelectorAll("tr").forEach(row=>{
+table.parentNode.insertBefore(title,table);
 
-if(row.classList.contains("row-contract"))
-row.style.background="#facc15";
+const range=document.createRange();
+range.setStartBefore(title);
+range.setEndAfter(table);
 
-if(row.classList.contains("row-discussion"))
-row.style.background="#1f4e79";
+const selection=window.getSelection();
+selection.removeAllRanges();
+selection.addRange(range);
 
-if(row.classList.contains("row-inactive"))
-row.style.background="#7f2d2d";
+document.execCommand("copy");
 
-});
+selection.removeAllRanges();
 
-let title = type==="export"
-? "<h3>Export Partners</h3>"
-: "<h3>Import Partners</h3>";
-
-const html = title + table.outerHTML;
-
-navigator.clipboard.write([
-new ClipboardItem({
-"text/html": new Blob([html], {type:"text/html"})
-})
-]);
+title.remove();
 
 alert("Table copied");
 
