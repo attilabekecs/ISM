@@ -507,16 +507,11 @@ function copyTable(type){
 
 let table=document.getElementById(type+"Table");
 
-const range=document.createRange();
-range.selectNode(table);
+let title = type==="export" ? "Export Partners\n\n" : "Import Partners\n\n";
 
-const selection=window.getSelection();
-selection.removeAllRanges();
-selection.addRange(range);
+let text = title + table.innerText;
 
-document.execCommand("copy");
-
-selection.removeAllRanges();
+navigator.clipboard.writeText(text);
 
 }
 
