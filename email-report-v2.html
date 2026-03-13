@@ -213,6 +213,11 @@ border-bottom:2px solid #0f172a;
 font-weight:600;
 }
 
+.row-signed{
+background:#16a34a;
+color:white;
+}
+
 </style>
 </head>
 
@@ -305,6 +310,7 @@ function getStatusClass(status){
 
 const s=status.toLowerCase();
 
+if(s.includes("szerződött")) return "signed";
 if(s.includes("szerződés")) return "contract";
 if(s.includes("termék")) return "discussion";
 if(s.includes("nem aktív") || s.includes("inactive")) return "inactive";
