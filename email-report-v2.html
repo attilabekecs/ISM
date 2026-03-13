@@ -97,7 +97,6 @@ display:grid;
 grid-template-columns:320px 1fr;
 gap:16px;
 padding:14px;
-border-bottom:2px solid #0f172a;
 }
 
 .partner-info{
@@ -107,6 +106,7 @@ border-radius:10px;
 display:flex;
 flex-direction:column;
 gap:6px;
+color:white;
 }
 
 .partner-top{
@@ -118,20 +118,24 @@ align-items:center;
 .partner-company{
 font-weight:700;
 font-size:14px;
-}
-
-.partner-country{
-font-size:12px;
-opacity:.7;
+color:white;
 }
 
 .partner-contact{
 font-size:13px;
+color:white;
 }
 
 .partner-phone{
 font-size:13px;
 opacity:.9;
+color:white;
+}
+
+.partner-country{
+font-size:12px;
+opacity:.7;
+color:white;
 }
 
 .partner-brands{
@@ -186,6 +190,17 @@ font-size:12px;
 font-weight:600;
 display:inline-block;
 margin-top:6px;
+}
+
+#exportTable td:first-child,
+#importTable td:first-child{
+text-align:center;
+vertical-align:middle;
+font-weight:600;
+}
+
+tbody tr{
+border-bottom:2px solid #0f172a;
 }
 
 </style>
