@@ -21,6 +21,21 @@ max-width:1400px;
 margin:auto;
 }
 
+.topbar{
+display:flex;
+gap:10px;
+align-items:center;
+margin-bottom:20px;
+}
+
+.search{
+padding:10px 14px;
+border-radius:8px;
+border:none;
+font-size:14px;
+width:260px;
+}
+
 h2{
 margin-top:40px;
 margin-bottom:15px;
@@ -82,8 +97,6 @@ font-weight:600;
 }
 
 .copy-btn{
-margin-bottom:20px;
-margin-right:10px;
 padding:10px 16px;
 border:none;
 border-radius:8px;
@@ -105,7 +118,19 @@ background:#0ea5e9;
 
 <div class="wrapper">
 
+<div class="topbar">
+
 <button onclick="copyTable('export')" class="copy-btn">Copy Export Table</button> <button onclick="copyTable('import')" class="copy-btn">Copy Import Table</button>
+
+<input 
+type="text" 
+class="search" 
+placeholder="Search company, brand, contact..."
+onkeyup="render()"
+id="searchInput"
+/>
+
+</div>
 
 <h2>Export Partners</h2>
 
@@ -228,9 +253,30 @@ return 3;
 
 }
 
+function matchSearch(p,term){
+
+const text = (
+p.company +
+p.contact +
+p.country +
+p.phone +
+p.brands +
+p.status
+).toLowerCase();
+
+return text.includes(term);
+
+}
+
 function render(){
 
-const rows=allData.map(normalize);
+const search=document.getElementById("searchInput").value.toLowerCase();
+
+let rows=allData.map(normalize);
+
+if(search){
+rows = rows.filter(p=>matchSearch(p,search));
+}
 
 const buyers=rows.filter(r=>r.type.toLowerCase().includes("buyer"));
 const sellers=rows.filter(r=>r.type.toLowerCase().includes("seller"));
@@ -290,8 +336,6 @@ load();
 
 setInterval(load,15000);
 
-/* COPY LIKE MANUAL SELECTION */
-
 function copyTable(type){
 
 let table=document.getElementById(type+"Table");
@@ -323,8 +367,6 @@ document.execCommand("copy");
 selection.removeAllRanges();
 
 title.remove();
-
-alert("Table copied");
 
 }
 
