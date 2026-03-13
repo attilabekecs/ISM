@@ -152,6 +152,8 @@ border-radius:6px;
 text-decoration:none;
 font-size:12px;
 font-weight:600;
+display:inline-block;
+margin-top:6px;
 }
 
 </style>
@@ -204,7 +206,6 @@ id="searchInput"
 <th>Country</th>
 <th>Phone</th>
 <th>Brands</th>
-<th>WhatsApp offers</th>
 </tr>
 </thead>
 <tbody id="importBody"></tbody>
@@ -338,7 +339,7 @@ return `<span class="brand-tag">${item}</span>`;
 }).join("");
 
 }
-  
+
 function render(){
 
 const search=document.getElementById("searchInput").value.toLowerCase();
@@ -382,22 +383,21 @@ sellers.forEach(p=>{
 
 const statusClass=getStatusClass(p.status);
 
-let whatsappLink="";
+let companyHTML = `<div class="company">${p.company}</div>`;
 
 if(p.statusDate){
-whatsappLink=`<a href="${p.statusDate}" target="_blank" class="wa-btn">Open WhatsApp</a>`;
+companyHTML += `<a href="${p.statusDate}" target="_blank" class="wa-btn">WhatsApp</a>`;
 }
 
 importHTML+=`
 
 <tr class="row-${statusClass}">
 <td>${p.status}</td>
-<td class="company">${p.company}</td>
+<td>${companyHTML}</td>
 <td>${p.contact}</td>
 <td>${p.country}</td>
 <td>${p.phone}</td>
 <td class="brands">${formatBrands(p.brands)}</td>
-<td>${whatsappLink}</td>
 </tr>
 
 `;
