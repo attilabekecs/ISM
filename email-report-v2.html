@@ -324,6 +324,7 @@ function buyerPriority(status){
 
 const s=status.toLowerCase();
 
+if(s.includes("szerződött")) return 0;
 if(s.includes("szerződés")) return 1;
 if(s.includes("termék")) return 2;
 if(s.includes("drágák")) return 3;
