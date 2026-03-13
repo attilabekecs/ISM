@@ -380,6 +380,8 @@ function formatBrands(text){
 
 if(!text) return "";
 
+let search=document.getElementById("searchInput").value.toLowerCase();
+
 let items = text.split(",").map(i=>i.trim());
 
 return items.map(item=>{
@@ -388,14 +390,14 @@ let priceMatch = item.match(/(.*?)(\d+[.,]?\d*\s?€?)$/);
 
 if(priceMatch){
 
-let name = priceMatch[1].trim();
+let name = highlight(priceMatch[1].trim(),search);
 let price = priceMatch[2].trim();
 
 return `<span class="brand-tag">${name} <span class="brand-price">${price}</span></span>`;
 
 }
 
-return `<span class="brand-tag">${item}</span>`;
+return `<span class="brand-tag">${highlight(item,search)}</span>`;
 
 }).join("");
 
