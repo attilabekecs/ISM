@@ -327,7 +327,7 @@ let priceMatch = item.match(/(.*?)(\d+[.,]?\d*\s?€?)$/);
 if(priceMatch){
 
 let name = priceMatch[1].trim();
-let price = priceMatch[2];
+let price = priceMatch[2].trim();
 
 return `<span class="brand-tag">${name} <span class="brand-price">${price}</span></span>`;
 
@@ -338,7 +338,7 @@ return `<span class="brand-tag">${item}</span>`;
 }).join("");
 
 }
-
+  
 function render(){
 
 const search=document.getElementById("searchInput").value.toLowerCase();
