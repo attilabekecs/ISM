@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Email Report</title>
+<title>Email Report v2.1.4</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -189,6 +190,7 @@ white-space:nowrap;
 }
 
 </style>
+
 </head>
 
 <body>
@@ -197,11 +199,9 @@ white-space:nowrap;
 
 <div class="topbar">
 
-<button onclick="copyTable('export')" class="copy-btn">Copy Export Table</button>
-<button onclick="copyTable('import')" class="copy-btn">Copy Import Table</button>
+<button onclick="copyTable('export')" class="copy-btn">Copy Export Table</button> <button onclick="copyTable('import')" class="copy-btn">Copy Import Table</button>
 
 <input type="text" class="search" placeholder="Search company, brand, contact..." onkeyup="render()" id="searchInput"/>
-
 <div id="rateDisplay" class="rate-badge">
 Folyamatban...
 </div>
@@ -240,50 +240,48 @@ Folyamatban...
 
 <script>
 
-let eurRate = null;
+let eurRate = 400;
 
 async function loadRate(){
-
-try{
-
-const res = await fetch("https://corsproxy.io/?https://query1.finance.yahoo.com/v8/finance/chart/EURHUF=X");
-const data = await res.json();
-
-let rate = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
-
-if(rate){
-eurRate = Number(rate);
-}else{
-throw new Error("Yahoo failed");
-}
-
-}catch(e){
 
 try{
 
 const res = await fetch("https://open.er-api.com/v6/latest/EUR");
 const data = await res.json();
 
-eurRate = data?.rates?.HUF || null;
+let rate = data?.rates?.HUF;
+let updateTime = data?.time_last_update_unix;
 
-}catch(e2){
+if(rate){
 
-console.log("Rate error", e2);
-eurRate = null;
+eurRate = rate;
+
+let timeText = "";
+
+if(updateTime){
+
+const date = new Date(updateTime * 1000);
+
+timeText = date.toLocaleString("hu-HU",{
+year:"numeric",
+month:"2-digit",
+day:"2-digit",
+hour:"2-digit",
+minute:"2-digit"
+});
 
 }
 
+document.getElementById("rateDisplay").innerText =
+`1 EUR = ${eurRate.toFixed(2)} HUF (Frissítve: ${timeText})`;
+
 }
 
-const display=document.getElementById("rateDisplay");
+}catch(e){
 
-if(eurRate){
-display.innerText=`1 EUR = ${eurRate.toFixed(2)} HUF`;
-}else{
-display.innerText="Nincs árfolyam";
+console.log("Rate error", e);
+
 }
-
-render();
 
 }
 
@@ -325,6 +323,33 @@ statusDate:r["Státusz változás"]||""
 };
 }
 
+function getStatusClass(status){
+const s=status.toLowerCase();
+if(s.includes("szerződött")) return "signed";
+if(s.includes("szerződés")) return "contract";
+if(s.includes("termék")) return "discussion";
+if(s.includes("nem aktív") || s.includes("inactive")) return "inactive";
+if(s.includes("aktív") || s.includes("active")) return "contract";
+return "other";
+}
+
+function buyerPriority(status){
+const s=status.toLowerCase();
+if(s.includes("szerződött")) return 0;
+if(s.includes("szerződés")) return 1;
+if(s.includes("termék")) return 2;
+if(s.includes("drágák")) return 3;
+if(s.includes("nem aktív")) return 4;
+return 5;
+}
+
+function sellerPriority(status){
+const s=status.toLowerCase();
+if(s.includes("aktív") && !s.includes("nem")) return 1;
+if(s.includes("nem aktív")) return 2;
+return 3;
+}
+
 function matchSearch(p,term){
 const text=(p.company+p.contact+p.country+p.phone+p.brands+p.status).toLowerCase();
 return text.includes(term);
@@ -341,34 +366,46 @@ function formatBrands(text){
 if(!text) return "";
 
 let search=document.getElementById("searchInput").value.toLowerCase();
+
 let items=text.split(",").map(i=>i.trim());
 
 return items.map(item=>{
 
-let priceMatch=item.match(/(.*?)(\d+[.,]?\d*)\s?€$/);
+// EUR price
+let eurMatch=item.match(/(.*?)(\d+[.,]?\d*)\s?€$/i);
 
-if(priceMatch){
+// HUF price
+let hufMatch=item.match(/(.*?)(\d[\d\s.,]*)\s?HUF$/i);
 
-let name=highlight(priceMatch[1].trim(),search);
-let eur=parseFloat(priceMatch[2].replace(",","."));
+if(eurMatch){
 
-let price;
+let name=highlight(eurMatch[1].trim(),search);
 
-if(eurRate){
-
+let eur=parseFloat(eurMatch[2].replace(",","."));  
 let huf=Math.round(eur*eurRate).toLocaleString("hu-HU");
-price=`${eur.toFixed(2)}€ / ${huf} HUF`;
 
-}else{
-
-price=`${eur.toFixed(2)}€`;
-
-}
+let price=`${eur.toFixed(2)}€ / ${huf} HUF`;
 
 return `<span class="brand-tag">${name} <span class="brand-price">${price}</span></span>`;
-
 }
 
+if(hufMatch){
+
+let name=highlight(hufMatch[1].trim(),search);
+
+let huf=parseFloat(
+hufMatch[2]
+.replace(/\s/g,"")
+.replace(/\./g,"")
+.replace(",",".")
+);
+
+let price=`${Math.round(huf).toLocaleString("hu-HU")} HUF`;
+
+return `<span class="brand-tag">${name} <span class="brand-price">${price}</span></span>`;
+}
+
+// no price
 return `<span class="brand-tag">${highlight(item,search)}</span>`;
 
 }).join("");
@@ -378,20 +415,29 @@ return `<span class="brand-tag">${highlight(item,search)}</span>`;
 function render(){
 
 const search=document.getElementById("searchInput").value.toLowerCase();
+
 let rows=allData.map(normalize);
 
 if(search){
 rows=rows.filter(p=>matchSearch(p,search));
 }
 
+const buyers=rows.filter(r=>r.type.toLowerCase().includes("buyer"));
+const sellers=rows.filter(r=>r.type.toLowerCase().includes("seller"));
+
+buyers.sort((a,b)=>buyerPriority(a.status)-buyerPriority(b.status));
+sellers.sort((a,b)=>sellerPriority(a.status)-sellerPriority(b.status));
+
 let exportHTML="";
 let importHTML="";
 
-rows.forEach(p=>{
+buyers.forEach(p=>{
+
+const statusClass=getStatusClass(p.status);
 
 exportHTML+=`
 
-<tr>
+<tr class="row-${statusClass}">
 <td>${highlight(p.status,search)}</td>
 <td class="company">${highlight(p.company,search)}</td>
 <td>${highlight(p.contact,search)}</td>
@@ -404,7 +450,53 @@ exportHTML+=`
 
 });
 
+sellers.forEach(p=>{
+
+const statusClass=getStatusClass(p.status);
+
+let whatsappHTML="";
+
+if(p.statusDate){
+whatsappHTML=`<a href="${p.statusDate}" target="_blank" class="wa-btn">WhatsApp Channel offers</a>`;
+}
+
+importHTML+=`
+
+<tr class="row-${statusClass}">
+<td>${highlight(p.status,search)}</td>
+<td>
+
+<div class="partner-row">
+
+<div class="partner-info">
+
+<div class="partner-top">
+<div class="partner-company">${highlight(p.company,search)}</div>
+<div class="partner-country">${highlight(p.country,search)}</div>
+</div>
+
+<div class="partner-contact">${highlight(p.contact,search)}</div>
+<div class="partner-phone">${highlight(p.phone,search)}</div>
+
+${whatsappHTML}
+
+</div>
+
+<div class="partner-brands">
+${formatBrands(p.brands)}
+</div>
+
+</div>
+
+</td>
+</tr>
+
+`;
+
+});
+
 document.getElementById("exportBody").innerHTML=exportHTML;
+document.getElementById("importBody").innerHTML=importHTML;
 
 }
 
@@ -414,6 +506,22 @@ setInterval(load,15000);
 function copyTable(type){
 
 let table=document.getElementById(type+"Table");
+
+let title=document.createElement("tr");
+let cell=document.createElement("td");
+
+cell.colSpan=table.rows[0].cells.length;
+cell.style.fontWeight="700";
+cell.style.textAlign="left";
+cell.style.background="#0f172a";
+cell.style.color="white";
+
+cell.innerText=type==="export"?"Export Partners":"Import Partners";
+
+title.appendChild(cell);
+
+let tbody=table.querySelector("tbody");
+table.insertBefore(title,tbody);
 
 const range=document.createRange();
 range.selectNode(table);
@@ -425,6 +533,8 @@ selection.addRange(range);
 document.execCommand("copy");
 
 selection.removeAllRanges();
+
+title.remove();
 
 }
 
