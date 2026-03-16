@@ -245,7 +245,7 @@ let eurRate = 400;
 async function loadRate(){
 try{
 
-const res = await fetch("https://api.exchangerate.host/latest?base=EUR&symbols=HUF");
+const res = await fetch("https://api.frankfurter.dev/v1/latest?base=EUR&symbols=HUF");
 const data = await res.json();
 
 eurRate = data?.rates?.HUF || eurRate;
