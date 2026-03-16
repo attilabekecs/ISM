@@ -245,7 +245,7 @@ let eurRate = 400;
 async function loadRate(){
 try{
 
-const res = await fetch("https://api.allorigins.win/raw?url=https://query1.finance.yahoo.com/v8/finance/chart/EURHUF=X");
+const res = await fetch("https://corsproxy.io/?https://query1.finance.yahoo.com/v8/finance/chart/EURHUF=X");
 const data = await res.json();
 
 eurRate = data?.chart?.result?.[0]?.meta?.regularMarketPrice || eurRate;
