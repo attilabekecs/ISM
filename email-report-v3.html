@@ -203,7 +203,7 @@ white-space:nowrap;
 
 <input type="text" class="search" placeholder="Search company, brand, contact..." onkeyup="render()" id="searchInput"/>
 <div id="rateDisplay" class="rate-badge">
-1 EUR = ...
+Folyamatban...
 </div>
 
 </div>
@@ -245,7 +245,7 @@ let eurRate = 400;
 async function loadRate(){
 try{
 
-const res = await fetch("https://api.exchangerate.host/latest?base=EUR&symbols=HUF");
+const res = await fetch("https://open.er-api.com/v6/latest/EUR");
 const data = await res.json();
 
 eurRate = data?.rates?.HUF || eurRate;
@@ -254,7 +254,9 @@ document.getElementById("rateDisplay").innerText =
 `1 EUR = ${Math.round(eurRate)} HUF`;
 
 }catch(e){
-console.log("Rate error, fallback used");
+console.log("Rate error");
+document.getElementById("rateDisplay").innerText =
+"Árfolyam nem elérhető";
 }
 }
 
