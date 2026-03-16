@@ -245,7 +245,7 @@ let eurRate = 400;
 async function loadRate(){
 try{
 
-const res = await fetch("https://data.fixer.io/api/latest");
+const res = await fetch("https://openexchangerates.org");
 const data = await res.json();
 
 eurRate = data?.rates?.HUF || eurRate;
