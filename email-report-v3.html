@@ -179,6 +179,16 @@ padding:2px 4px;
 border-radius:4px;
 }
 
+.rate-badge{
+background:#1e293b;
+padding:10px 14px;
+border-radius:8px;
+font-size:13px;
+font-weight:600;
+color:#38bdf8;
+white-space:nowrap;
+}
+
 </style>
 
 </head>
@@ -192,6 +202,9 @@ border-radius:4px;
 <button onclick="copyTable('export')" class="copy-btn">Copy Export Table</button> <button onclick="copyTable('import')" class="copy-btn">Copy Import Table</button>
 
 <input type="text" class="search" placeholder="Search company, brand, contact..." onkeyup="render()" id="searchInput"/>
+<div id="rateDisplay" class="rate-badge">
+1 EUR = ...
+</div>
 
 </div>
 
@@ -231,9 +244,15 @@ let eurRate = 400;
 
 async function loadRate(){
 try{
+
 const res = await fetch("https://api.exchangerate.host/latest?base=EUR&symbols=HUF");
 const data = await res.json();
-eurRate = data.rates.HUF;
+
+eurRate = data?.rates?.HUF || eurRate;
+
+document.getElementById("rateDisplay").innerText =
+`1 EUR = ${Math.round(eurRate)} HUF`;
+
 }catch(e){
 console.log("Rate error, fallback used");
 }
