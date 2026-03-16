@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 <head>
 <meta charset="UTF-8">
@@ -71,26 +72,10 @@ padding:14px;
 font-size:13px;
 }
 
-/* row colors */
-
-.row-contract{
-background:#facc15;
-color:#000;
-}
-
-.row-discussion{
-background:#1f4e79;
-}
-
-.row-inactive{
-background:#7f2d2d;
-}
-
-.row-other{
-background:#1e293b;
-}
-
-/* seller partner card layout */
+.row-contract{background:#facc15;color:#000;}
+.row-discussion{background:#1f4e79;}
+.row-inactive{background:#7f2d2d;}
+.row-other{background:#1e293b;}
 
 .partner-row{
 display:grid;
@@ -115,24 +100,10 @@ justify-content:space-between;
 align-items:center;
 }
 
-.partner-company{
-font-weight:700;
-font-size:14px;
-}
-
-.partner-country{
-font-size:12px;
-opacity:.7;
-}
-
-.partner-contact{
-font-size:13px;
-}
-
-.partner-phone{
-font-size:13px;
-opacity:.9;
-}
+.partner-company{font-weight:700;font-size:14px;}
+.partner-country{font-size:12px;opacity:.7;}
+.partner-contact{font-size:13px;}
+.partner-phone{font-size:13px;opacity:.9;}
 
 .partner-brands{
 display:flex;
@@ -140,8 +111,6 @@ flex-wrap:wrap;
 gap:6px;
 align-content:flex-start;
 }
-
-/* brand tags */
 
 .brand-tag{
 background:#0f172a;
@@ -160,12 +129,6 @@ color:#38bdf8;
 font-weight:700;
 }
 
-.brand-tag:hover{
-border-color:#38bdf8;
-}
-
-/* buttons */
-
 .copy-btn{
 padding:10px 16px;
 border:none;
@@ -176,9 +139,7 @@ font-weight:600;
 cursor:pointer;
 }
 
-.copy-btn:hover{
-background:#0ea5e9;
-}
+.copy-btn:hover{background:#0ea5e9;}
 
 .wa-btn{
 background:#25D366;
@@ -192,8 +153,6 @@ display:inline-block;
 margin-top:6px;
 }
 
-/* status column */
-
 #exportTable td:first-child,
 #importTable td:first-child,
 #exportTable th:first-child,
@@ -205,25 +164,33 @@ white-space:nowrap;
 width:120px;
 }
 
-tbody tr{
-border-bottom:2px solid #0f172a;
-}
-
-.company{
-font-weight:600;
-}
+tbody tr{border-bottom:2px solid #0f172a;}
+.company{font-weight:600;}
 
 .row-signed{
 background:#16a34a;
 color:white;
 }
+
 .highlight{
 background:#facc15;
 color:#000;
 padding:2px 4px;
 border-radius:4px;
 }
+
+.rate-badge{
+background:#1e293b;
+padding:10px 14px;
+border-radius:8px;
+font-size:13px;
+font-weight:600;
+color:#38bdf8;
+white-space:nowrap;
+}
+
 </style>
+
 </head>
 
 <body>
@@ -232,16 +199,12 @@ border-radius:4px;
 
 <div class="topbar">
 
-<button onclick="copyTable('export')" class="copy-btn">Copy Export Table</button>
-<button onclick="copyTable('import')" class="copy-btn">Copy Import Table</button>
+<button onclick="copyTable('export')" class="copy-btn">Copy Export Table</button> <button onclick="copyTable('import')" class="copy-btn">Copy Import Table</button>
 
-<input 
-type="text" 
-class="search" 
-placeholder="Search company, brand, contact..."
-onkeyup="render()"
-id="searchInput"
-/>
+<input type="text" class="search" placeholder="Search company, brand, contact..." onkeyup="render()" id="searchInput"/>
+<div id="rateDisplay" class="rate-badge">
+Folyamatban...
+</div>
 
 </div>
 
@@ -277,27 +240,52 @@ id="searchInput"
 
 <script>
 
+let eurRate = 400;
+
+async function loadRate(){
+try{
+
+const res = await fetch("https://open.er-api.com/v6/latest/EUR");
+const data = await res.json();
+
+eurRate = data?.rates?.HUF || eurRate;
+
+document.getElementById("rateDisplay").innerText =
+`1 EUR = ${eurRate.toFixed(2)} HUF`;
+
+}catch(e){
+console.log("Rate error");
+document.getElementById("rateDisplay").innerText =
+"Árfolyam nem elérhető";
+}
+}
+
+loadRate();
+setInterval(loadRate,3600000);
+
 const API_URL="https://script.google.com/macros/s/AKfycbyJIJ718HHofwJhyyfxJ_qcq1-GcOCNxscZ_sCMsDAThG1vOmTRxWzfs6Vogz30h6nj/exec";
 
 let allData=[];
 
-function load(){
+async function load(){
 
-const script=document.createElement("script");
-script.src=API_URL+"?callback=handleData&_="+Date.now();
-document.body.appendChild(script);
+try{
+
+const res = await fetch(API_URL + "?_=" + Date.now());
+const data = await res.json();
+
+allData = data;
+render();
+
+}catch(e){
+
+console.log("Data load error");
 
 }
-
-function handleData(data){
-
-allData=data;
-render();
 
 }
 
 function normalize(r){
-
 return{
 company:r.Company||"",
 contact:r.Contact||"",
@@ -308,73 +296,45 @@ type:(r.Type||""),
 status:r["Státusz"]||"",
 statusDate:r["Státusz változás"]||""
 };
-
 }
 
 function getStatusClass(status){
-
 const s=status.toLowerCase();
-
 if(s.includes("szerződött")) return "signed";
 if(s.includes("szerződés")) return "contract";
 if(s.includes("termék")) return "discussion";
 if(s.includes("nem aktív") || s.includes("inactive")) return "inactive";
 if(s.includes("aktív") || s.includes("active")) return "contract";
-
 return "other";
-
 }
 
 function buyerPriority(status){
-
 const s=status.toLowerCase();
-
 if(s.includes("szerződött")) return 0;
 if(s.includes("szerződés")) return 1;
 if(s.includes("termék")) return 2;
 if(s.includes("drágák")) return 3;
 if(s.includes("nem aktív")) return 4;
-
 return 5;
-
 }
 
 function sellerPriority(status){
-
 const s=status.toLowerCase();
-
 if(s.includes("aktív") && !s.includes("nem")) return 1;
 if(s.includes("nem aktív")) return 2;
-
 return 3;
-
 }
 
 function matchSearch(p,term){
-
-const text = (
-p.company +
-p.contact +
-p.country +
-p.phone +
-p.brands +
-p.status
-).toLowerCase();
-
+const text=(p.company+p.contact+p.country+p.phone+p.brands+p.status).toLowerCase();
 return text.includes(term);
-
 }
+
 function highlight(text,term){
-
 if(!term) return text;
-
-const regex = new RegExp(`(${term})`, "gi");
-
+const regex=new RegExp(`(${term})`,"gi");
 return text.replace(regex,'<span class="highlight">$1</span>');
-
 }
-
-/* brand formatter */
 
 function formatBrands(text){
 
@@ -382,19 +342,22 @@ if(!text) return "";
 
 let search=document.getElementById("searchInput").value.toLowerCase();
 
-let items = text.split(",").map(i=>i.trim());
+let items=text.split(",").map(i=>i.trim());
 
 return items.map(item=>{
 
-let priceMatch = item.match(/(.*?)(\d+[.,]?\d*\s?€?)$/);
+let priceMatch=item.match(/(.*?)(\d+[.,]?\d*)\s?€$/);
 
 if(priceMatch){
 
-let name = highlight(priceMatch[1].trim(),search);
-let price = priceMatch[2].trim();
+let name=highlight(priceMatch[1].trim(),search);
+
+let eur=parseFloat(priceMatch[2].replace(",","."));
+let huf=Math.round(eur*eurRate).toLocaleString("hu-HU");
+
+let price=`${eur.toFixed(2)}€ / ${huf} HUF`;
 
 return `<span class="brand-tag">${name} <span class="brand-price">${price}</span></span>`;
-
 }
 
 return `<span class="brand-tag">${highlight(item,search)}</span>`;
@@ -422,8 +385,6 @@ sellers.sort((a,b)=>sellerPriority(a.status)-sellerPriority(b.status));
 let exportHTML="";
 let importHTML="";
 
-/* BUYERS (table layout) */
-
 buyers.forEach(p=>{
 
 const statusClass=getStatusClass(p.status);
@@ -436,18 +397,12 @@ exportHTML+=`
 <td>${highlight(p.contact,search)}</td>
 <td>${highlight(p.country,search)}</td>
 <td>${highlight(p.phone,search)}</td>
-<td>
-<div class="partner-brands">
-${formatBrands(p.brands)}
-</div>
-</td>
+<td><div class="partner-brands">${formatBrands(p.brands)}</div></td>
 </tr>
 
 `;
 
 });
-
-/* SELLERS (card layout) */
 
 sellers.forEach(p=>{
 
@@ -500,28 +455,27 @@ document.getElementById("importBody").innerHTML=importHTML;
 }
 
 load();
-
 setInterval(load,15000);
 
 function copyTable(type){
 
 let table=document.getElementById(type+"Table");
 
-let title = document.createElement("tr");
-let cell = document.createElement("td");
+let title=document.createElement("tr");
+let cell=document.createElement("td");
 
-cell.colSpan = table.rows[0].cells.length;
-cell.style.fontWeight = "700";
-cell.style.textAlign = "left";
-cell.style.background = "#0f172a";
-cell.style.color = "white";
+cell.colSpan=table.rows[0].cells.length;
+cell.style.fontWeight="700";
+cell.style.textAlign="left";
+cell.style.background="#0f172a";
+cell.style.color="white";
 
-cell.innerText = type==="export" ? "Export Partners" : "Import Partners";
+cell.innerText=type==="export"?"Export Partners":"Import Partners";
 
 title.appendChild(cell);
 
-let tbody = table.querySelector("tbody");
-table.insertBefore(title, tbody);
+let tbody=table.querySelector("tbody");
+table.insertBefore(title,tbody);
 
 const range=document.createRange();
 range.selectNode(table);
