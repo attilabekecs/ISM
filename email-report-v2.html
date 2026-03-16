@@ -3,7 +3,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Email Report v2.1</title>
+<title>Email Report v2.2</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -255,7 +255,7 @@ const data = await res.json();
 let meta = data?.chart?.result?.[0]?.meta;
 
 let rate = meta?.regularMarketPrice;
-let marketTime = meta?.regularMarketTime;
+let marketTime = meta?.regularMarketTime || data?.chart?.result?.[0]?.timestamp?.slice(-1)[0];
 
 if(rate){
 
