@@ -442,7 +442,21 @@ exportHTML+=`
 <td class="company">${highlight(p.company,search)}</td>
 <td>${highlight(p.contact,search)}</td>
 <td>${highlight(p.country,search)}</td>
-<td>${highlight(p.phone,search)}</td>
+<td>
+
+${(() => {
+const info = splitContactInfo(p.phone);
+
+let phones = info.phones.map(ph => highlight(ph, search)).join("<br>");
+let emails = info.emails.map(em => `<div style="opacity:.8">${highlight(em, search)}</div>`).join("");
+
+return `
+<div>${phones}</div>
+${emails}
+`;
+})()}
+
+</td>
 <td><div class="partner-brands">${formatBrands(p.brands)}</div></td>
 </tr>
 
@@ -476,7 +490,21 @@ importHTML+=`
 </div>
 
 <div class="partner-contact">${highlight(p.contact,search)}</div>
-<div class="partner-phone">${highlight(p.phone,search)}</div>
+<div class="partner-phone">
+
+${(() => {
+const info = splitContactInfo(p.phone);
+
+let phones = info.phones.map(ph => highlight(ph, search)).join("<br>");
+let emails = info.emails.map(em => `<div style="opacity:.8">${highlight(em, search)}</div>`).join("");
+
+return `
+<div>${phones}</div>
+${emails}
+`;
+})()}
+
+</div>
 
 ${whatsappHTML}
 
@@ -535,6 +563,27 @@ document.execCommand("copy");
 selection.removeAllRanges();
 
 title.remove();
+
+}
+
+function splitContactInfo(text){
+
+if(!text) return { phones: [], emails: [] };
+
+let parts = text.split(/[,;]/).map(p => p.trim());
+
+let phones = [];
+let emails = [];
+
+parts.forEach(p=>{
+if(p.includes("@")){
+emails.push(p);
+}else{
+phones.push(p);
+}
+});
+
+return { phones, emails };
 
 }
 
