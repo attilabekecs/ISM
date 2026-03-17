@@ -3,7 +3,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Email Report v2.1.6</title>
+<title>ERT v3.1</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -199,7 +199,9 @@ white-space:nowrap;
 
 <div class="topbar">
 
-<button onclick="copyTable('export')" class="copy-btn">Copy Export Table</button> <button onclick="copyTable('import')" class="copy-btn">Copy Import Table</button>
+<button onclick="copyTable('export')" class="copy-btn">Copy Export Table</button>
+<button onclick="copyTable('import')" class="copy-btn">Copy Import Table</button>
+<button onclick="copyTable('multiland')" class="copy-btn">Copy Multiland Table</button>
 
 <input type="text" class="search" placeholder="Search company, brand, contact..." onkeyup="render()" id="searchInput"/>
 <div id="rateDisplay" class="rate-badge">
@@ -234,6 +236,22 @@ Folyamatban...
 </tr>
 </thead>
 <tbody id="importBody"></tbody>
+</table>
+
+<h2>Multiland Partners</h2>
+
+<table id="multilandTable">
+<thead>
+<tr>
+<th>Status</th>
+<th>Company</th>
+<th>Contact</th>
+<th>Country</th>
+<th>Phone</th>
+<th>Brands</th>
+</tr>
+</thead>
+<tbody id="multilandBody"></tbody>
 </table>
 
 </div>
@@ -328,6 +346,7 @@ const s=status.toLowerCase();
 if(s.includes("szerződött")) return "signed";
 if(s.includes("szerződés")) return "contract";
 if(s.includes("termék")) return "discussion";
+if(s.includes("nem akarnak együtt dolgozni")) return "inactive";
 if(s.includes("nem aktív") || s.includes("inactive")) return "inactive";
 if(s.includes("aktív") || s.includes("active")) return "contract";
 return "other";
@@ -371,45 +390,27 @@ let items=text.split(",").map(i=>i.trim());
 
 return items.map(item=>{
 
-// EUR price
 let eurMatch=item.match(/(.*?)(\d+[.,]?\d*)\s?€$/i);
-
-// HUF price
 let hufMatch=item.match(/(.*?)(\d[\d\s.,]*)\s?HUF$/i);
 
 if(eurMatch){
-
 let name=highlight(eurMatch[1].trim(),search);
-
 let eur=parseFloat(eurMatch[2].replace(",","."));  
 let huf=Math.round(eur*eurRate).toLocaleString("hu-HU");
-
 let price=`${eur.toFixed(2)}€ / ${huf} HUF`;
-
 return `<span class="brand-tag">${name} <span class="brand-price">${price}</span></span>`;
 }
 
 if(hufMatch){
-
 let name=highlight(hufMatch[1].trim(),search);
-
-let huf=parseFloat(
-hufMatch[2]
-.replace(/\s/g,"")
-.replace(/\./g,"")
-.replace(",",".")
-);
-
+let huf=parseFloat(hufMatch[2].replace(/\s/g,"").replace(/\./g,"").replace(",","."));
 let price=`${Math.round(huf).toLocaleString("hu-HU")} HUF`;
-
 return `<span class="brand-tag">${name} <span class="brand-price">${price}</span></span>`;
 }
 
-// no price
 return `<span class="brand-tag">${highlight(item,search)}</span>`;
 
 }).join("");
-
 }
 
 function render(){
@@ -424,107 +425,95 @@ rows=rows.filter(p=>matchSearch(p,search));
 
 const buyers=rows.filter(r=>r.type.toLowerCase().includes("buyer"));
 const sellers=rows.filter(r=>r.type.toLowerCase().includes("seller"));
+const multiland=rows.filter(r=>r.type.toLowerCase().includes("multiland"));
 
 buyers.sort((a,b)=>buyerPriority(a.status)-buyerPriority(b.status));
 sellers.sort((a,b)=>sellerPriority(a.status)-sellerPriority(b.status));
+multiland.sort((a,b)=>buyerPriority(a.status)-buyerPriority(b.status));
 
 let exportHTML="";
 let importHTML="";
+let multilandHTML="";
 
+/* EXPORT */
 buyers.forEach(p=>{
-
 const statusClass=getStatusClass(p.status);
-
 exportHTML+=`
-
 <tr class="row-${statusClass}">
 <td>${highlight(p.status,search)}</td>
 <td class="company">${highlight(p.company,search)}</td>
 <td>${highlight(p.contact,search)}</td>
 <td>${highlight(p.country,search)}</td>
 <td>
-
 ${(() => {
 const info = splitContactInfo(p.phone);
-
 let phones = info.phones.map(ph => highlight(ph, search)).join("<br>");
 let emails = info.emails.map(em => `<div style="opacity:.8">${highlight(em, search)}</div>`).join("");
-
-return `
-<div>${phones}</div>
-${emails}
-`;
+return `<div>${phones}</div>${emails}`;
 })()}
-
 </td>
 <td><div class="partner-brands">${formatBrands(p.brands)}</div></td>
-</tr>
-
-`;
-
+</tr>`;
 });
 
+/* IMPORT */
 sellers.forEach(p=>{
-
 const statusClass=getStatusClass(p.status);
-
 let whatsappHTML="";
-
 if(p.statusDate){
 whatsappHTML=`<a href="${p.statusDate}" target="_blank" class="wa-btn">WhatsApp Channel offers</a>`;
 }
-
 importHTML+=`
-
 <tr class="row-${statusClass}">
 <td>${highlight(p.status,search)}</td>
 <td>
-
 <div class="partner-row">
-
 <div class="partner-info">
-
 <div class="partner-top">
 <div class="partner-company">${highlight(p.company,search)}</div>
 <div class="partner-country">${highlight(p.country,search)}</div>
 </div>
-
 <div class="partner-contact">${highlight(p.contact,search)}</div>
 <div class="partner-phone">
-
 ${(() => {
 const info = splitContactInfo(p.phone);
-
 let phones = info.phones.map(ph => highlight(ph, search)).join("<br>");
 let emails = info.emails.map(em => `<div style="opacity:.8">${highlight(em, search)}</div>`).join("");
-
-return `
-<div>${phones}</div>
-${emails}
-`;
+return `<div>${phones}</div>${emails}`;
 })()}
-
 </div>
-
 ${whatsappHTML}
-
 </div>
-
-<div class="partner-brands">
-${formatBrands(p.brands)}
+<div class="partner-brands">${formatBrands(p.brands)}</div>
 </div>
-
-</div>
-
 </td>
-</tr>
+</tr>`;
+});
 
-`;
-
+/* MULTILAND */
+multiland.forEach(p=>{
+const statusClass=getStatusClass(p.status);
+multilandHTML+=`
+<tr class="row-${statusClass}">
+<td>${highlight(p.status,search)}</td>
+<td class="company">${highlight(p.company,search)}</td>
+<td>${highlight(p.contact,search)}</td>
+<td>${highlight(p.country,search)}</td>
+<td>
+${(() => {
+const info = splitContactInfo(p.phone);
+let phones = info.phones.map(ph => highlight(ph, search)).join("<br>");
+let emails = info.emails.map(em => `<div style="opacity:.8">${highlight(em, search)}</div>`).join("");
+return `<div>${phones}</div>${emails}`;
+})()}
+</td>
+<td><div class="partner-brands">${formatBrands(p.brands)}</div></td>
+</tr>`;
 });
 
 document.getElementById("exportBody").innerHTML=exportHTML;
 document.getElementById("importBody").innerHTML=importHTML;
+document.getElementById("multilandBody").innerHTML=multilandHTML;
 
 }
 
@@ -544,7 +533,7 @@ cell.style.textAlign="left";
 cell.style.background="#0f172a";
 cell.style.color="white";
 
-cell.innerText=type==="export"?"Export Partners":"Import Partners";
+cell.innerText=type==="export"?"Export Partners":type==="import"?"Import Partners":"Multiland Partners";
 
 title.appendChild(cell);
 
