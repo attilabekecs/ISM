@@ -346,6 +346,7 @@ const s=status.toLowerCase();
 if(s.includes("szerződött")) return "signed";
 if(s.includes("szerződés")) return "contract";
 if(s.includes("termék")) return "discussion";
+if(s.includes("nem akarnak együtt dolgozni")) return "inactive";
 if(s.includes("nem aktív") || s.includes("inactive")) return "inactive";
 if(s.includes("aktív") || s.includes("active")) return "contract";
 return "other";
