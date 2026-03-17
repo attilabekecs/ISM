@@ -1,14 +1,12 @@
 <!DOCTYPE html>
-
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Email Report v2.1.5</title>
+<title>Email Report v2.1.6</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-
 body{
 font-family:Inter,sans-serif;
 background:#0f172a;
@@ -16,10 +14,7 @@ color:#f8fafc;
 padding:30px;
 }
 
-.wrapper{
-max-width:1400px;
-margin:auto;
-}
+.wrapper{max-width:1400px;margin:auto;}
 
 .topbar{
 display:flex;
@@ -41,11 +36,7 @@ font-size:14px;
 width:260px;
 }
 
-h2{
-margin-top:40px;
-margin-bottom:15px;
-font-weight:700;
-}
+h2{margin-top:40px;margin-bottom:15px;font-weight:700;}
 
 table{
 width:100%;
@@ -56,26 +47,16 @@ overflow:hidden;
 margin-bottom:40px;
 }
 
-thead{
-background:#334155;
-}
+thead{background:#334155;}
 
-th{
-padding:14px;
-text-align:center;
-font-size:13px;
-font-weight:600;
-}
-
-td{
-padding:14px;
-font-size:13px;
-}
+th{padding:14px;text-align:center;font-size:13px;font-weight:600;}
+td{padding:14px;font-size:13px;}
 
 .row-contract{background:#facc15;color:#000;}
 .row-discussion{background:#1f4e79;}
 .row-inactive{background:#7f2d2d;}
 .row-other{background:#1e293b;}
+.row-signed{background:#16a34a;color:white;}
 
 .partner-row{
 display:grid;
@@ -119,15 +100,11 @@ padding:6px 10px;
 border-radius:8px;
 font-size:12px;
 display:inline-flex;
-align-items:center;
 gap:6px;
 color:white;
 }
 
-.brand-price{
-color:#38bdf8;
-font-weight:700;
-}
+.brand-price{color:#38bdf8;font-weight:700;}
 
 .copy-btn{
 padding:10px 16px;
@@ -137,39 +114,6 @@ background:#38bdf8;
 color:white;
 font-weight:600;
 cursor:pointer;
-}
-
-.copy-btn:hover{background:#0ea5e9;}
-
-.wa-btn{
-background:#25D366;
-color:white;
-padding:6px 12px;
-border-radius:6px;
-text-decoration:none;
-font-size:12px;
-font-weight:600;
-display:inline-block;
-margin-top:6px;
-}
-
-#exportTable td:first-child,
-#importTable td:first-child,
-#exportTable th:first-child,
-#importTable th:first-child{
-text-align:center;
-vertical-align:middle;
-font-weight:600;
-white-space:nowrap;
-width:120px;
-}
-
-tbody tr{border-bottom:2px solid #0f172a;}
-.company{font-weight:600;}
-
-.row-signed{
-background:#16a34a;
-color:white;
 }
 
 .highlight{
@@ -188,9 +132,7 @@ font-weight:600;
 color:#38bdf8;
 white-space:nowrap;
 }
-
 </style>
-
 </head>
 
 <body>
@@ -198,117 +140,74 @@ white-space:nowrap;
 <div class="wrapper">
 
 <div class="topbar">
+<button onclick="copyTable('export')" class="copy-btn">Copy Export Table</button>
+<button onclick="copyTable('import')" class="copy-btn">Copy Import Table</button>
+<button onclick="copyTable('multiland')" class="copy-btn">Copy Multiland Table</button>
 
-<button onclick="copyTable('export')" class="copy-btn">Copy Export Table</button> <button onclick="copyTable('import')" class="copy-btn">Copy Import Table</button>
-
-<input type="text" class="search" placeholder="Search company, brand, contact..." onkeyup="render()" id="searchInput"/>
-<div id="rateDisplay" class="rate-badge">
-Folyamatban...
-</div>
-
+<input type="text" class="search" placeholder="Search..." onkeyup="render()" id="searchInput"/>
+<div id="rateDisplay" class="rate-badge">Folyamatban...</div>
 </div>
 
 <h2>Export Partners</h2>
-
 <table id="exportTable">
 <thead>
 <tr>
-<th>Status</th>
-<th>Company</th>
-<th>Contact</th>
-<th>Country</th>
-<th>Phone</th>
-<th>Brands</th>
+<th>Status</th><th>Company</th><th>Contact</th><th>Country</th><th>Phone</th><th>Brands</th>
 </tr>
 </thead>
 <tbody id="exportBody"></tbody>
 </table>
 
 <h2>Import Partners</h2>
-
 <table id="importTable">
 <thead>
 <tr>
-<th>Status</th>
-<th>Partner</th>
+<th>Status</th><th>Partner</th>
 </tr>
 </thead>
 <tbody id="importBody"></tbody>
+</table>
+
+<h2>Multiland Partners</h2>
+<table id="multilandTable">
+<thead>
+<tr>
+<th>Status</th><th>Company</th><th>Contact</th><th>Country</th><th>Phone</th><th>Brands</th>
+</tr>
+</thead>
+<tbody id="multilandBody"></tbody>
 </table>
 
 </div>
 
 <script>
 
-let eurRate = 400;
+let eurRate=400;
 
 async function loadRate(){
-
 try{
-
-const res = await fetch("https://open.er-api.com/v6/latest/EUR");
-const data = await res.json();
-
-let rate = data?.rates?.HUF;
-let updateTime = data?.time_last_update_unix;
-
+const res=await fetch("https://open.er-api.com/v6/latest/EUR");
+const data=await res.json();
+let rate=data?.rates?.HUF;
 if(rate){
-
-eurRate = rate;
-
-let timeText = "";
-
-if(updateTime){
-
-const date = new Date(updateTime * 1000);
-
-timeText = date.toLocaleString("hu-HU",{
-year:"numeric",
-month:"2-digit",
-day:"2-digit",
-hour:"2-digit",
-minute:"2-digit"
-});
-
+eurRate=rate;
+document.getElementById("rateDisplay").innerText=`1 EUR = ${eurRate.toFixed(2)} HUF`;
 }
-
-document.getElementById("rateDisplay").innerText =
-`1 EUR = ${eurRate.toFixed(2)} HUF (Frissítve: ${timeText})`;
-
+}catch(e){}
 }
-
-}catch(e){
-
-console.log("Rate error", e);
-
-}
-
-}
-
 loadRate();
-setInterval(loadRate,300000);
 
 const API_URL="https://script.google.com/macros/s/AKfycbyJIJ718HHofwJhyyfxJ_qcq1-GcOCNxscZ_sCMsDAThG1vOmTRxWzfs6Vogz30h6nj/exec";
 
 let allData=[];
 
 async function load(){
-
-try{
-
-const res = await fetch(API_URL + "?_=" + Date.now());
-const data = await res.json();
-
-allData = data;
+const res=await fetch(API_URL+"?_="+Date.now());
+allData=await res.json();
 render();
-
-}catch(e){
-
-console.log("Data load error");
-
 }
-
-}
+load();
+setInterval(load,15000);
 
 function normalize(r){
 return{
@@ -318,8 +217,7 @@ country:r.Country||"",
 phone:r.Phone||"",
 brands:r.Brands||"",
 type:(r.Type||""),
-status:r["Státusz"]||"",
-statusDate:r["Státusz változás"]||""
+status:r["Státusz"]||""
 };
 }
 
@@ -328,26 +226,8 @@ const s=status.toLowerCase();
 if(s.includes("szerződött")) return "signed";
 if(s.includes("szerződés")) return "contract";
 if(s.includes("termék")) return "discussion";
-if(s.includes("nem aktív") || s.includes("inactive")) return "inactive";
-if(s.includes("aktív") || s.includes("active")) return "contract";
+if(s.includes("nem aktív")) return "inactive";
 return "other";
-}
-
-function buyerPriority(status){
-const s=status.toLowerCase();
-if(s.includes("szerződött")) return 0;
-if(s.includes("szerződés")) return 1;
-if(s.includes("termék")) return 2;
-if(s.includes("drágák")) return 3;
-if(s.includes("nem aktív")) return 4;
-return 5;
-}
-
-function sellerPriority(status){
-const s=status.toLowerCase();
-if(s.includes("aktív") && !s.includes("nem")) return 1;
-if(s.includes("nem aktív")) return 2;
-return 3;
 }
 
 function matchSearch(p,term){
@@ -357,59 +237,24 @@ return text.includes(term);
 
 function highlight(text,term){
 if(!term) return text;
-const regex=new RegExp(`(${term})`,"gi");
-return text.replace(regex,'<span class="highlight">$1</span>');
+return text.replace(new RegExp(`(${term})`,"gi"),'<span class="highlight">$1</span>');
 }
 
 function formatBrands(text){
-
 if(!text) return "";
-
-let search=document.getElementById("searchInput").value.toLowerCase();
-
-let items=text.split(",").map(i=>i.trim());
-
-return items.map(item=>{
-
-// EUR price
-let eurMatch=item.match(/(.*?)(\d+[.,]?\d*)\s?€$/i);
-
-// HUF price
-let hufMatch=item.match(/(.*?)(\d[\d\s.,]*)\s?HUF$/i);
-
-if(eurMatch){
-
-let name=highlight(eurMatch[1].trim(),search);
-
-let eur=parseFloat(eurMatch[2].replace(",","."));  
-let huf=Math.round(eur*eurRate).toLocaleString("hu-HU");
-
-let price=`${eur.toFixed(2)}€ / ${huf} HUF`;
-
-return `<span class="brand-tag">${name} <span class="brand-price">${price}</span></span>`;
+let items=text.split(",");
+return items.map(i=>`<span class="brand-tag">${i}</span>`).join("");
 }
 
-if(hufMatch){
-
-let name=highlight(hufMatch[1].trim(),search);
-
-let huf=parseFloat(
-hufMatch[2]
-.replace(/\s/g,"")
-.replace(/\./g,"")
-.replace(",",".")
-);
-
-let price=`${Math.round(huf).toLocaleString("hu-HU")} HUF`;
-
-return `<span class="brand-tag">${name} <span class="brand-price">${price}</span></span>`;
-}
-
-// no price
-return `<span class="brand-tag">${highlight(item,search)}</span>`;
-
-}).join("");
-
+function splitContactInfo(text){
+if(!text) return {phones:[],emails:[]};
+let parts=text.split(/[,;]/);
+let phones=[],emails=[];
+parts.forEach(p=>{
+if(p.includes("@")) emails.push(p);
+else phones.push(p);
+});
+return {phones,emails};
 }
 
 function render(){
@@ -417,125 +262,61 @@ function render(){
 const search=document.getElementById("searchInput").value.toLowerCase();
 
 let rows=allData.map(normalize);
-
-if(search){
-rows=rows.filter(p=>matchSearch(p,search));
-}
+if(search) rows=rows.filter(p=>matchSearch(p,search));
 
 const buyers=rows.filter(r=>r.type.toLowerCase().includes("buyer"));
 const sellers=rows.filter(r=>r.type.toLowerCase().includes("seller"));
+const multiland=rows.filter(r=>r.type.toLowerCase().includes("multiland"));
 
-buyers.sort((a,b)=>buyerPriority(a.status)-buyerPriority(b.status));
-sellers.sort((a,b)=>sellerPriority(a.status)-sellerPriority(b.status));
-
-let exportHTML="";
-let importHTML="";
+let exportHTML="",importHTML="",multilandHTML="";
 
 buyers.forEach(p=>{
-
-const statusClass=getStatusClass(p.status);
-
 exportHTML+=`
-
-<tr class="row-${statusClass}">
+<tr class="row-${getStatusClass(p.status)}">
 <td>${highlight(p.status,search)}</td>
-<td class="company">${highlight(p.company,search)}</td>
+<td>${highlight(p.company,search)}</td>
 <td>${highlight(p.contact,search)}</td>
 <td>${highlight(p.country,search)}</td>
 <td>${highlight(p.phone,search)}</td>
-<td><div class="partner-brands">${formatBrands(p.brands)}</div></td>
-</tr>
-
-`;
-
+<td>${formatBrands(p.brands)}</td>
+</tr>`;
 });
 
 sellers.forEach(p=>{
-
-const statusClass=getStatusClass(p.status);
-
-let whatsappHTML="";
-
-if(p.statusDate){
-whatsappHTML=`<a href="${p.statusDate}" target="_blank" class="wa-btn">WhatsApp Channel offers</a>`;
-}
-
 importHTML+=`
-
-<tr class="row-${statusClass}">
+<tr class="row-${getStatusClass(p.status)}">
 <td>${highlight(p.status,search)}</td>
-<td>
+<td>${highlight(p.company,search)}</td>
+</tr>`;
+});
 
-<div class="partner-row">
-
-<div class="partner-info">
-
-<div class="partner-top">
-<div class="partner-company">${highlight(p.company,search)}</div>
-<div class="partner-country">${highlight(p.country,search)}</div>
-</div>
-
-<div class="partner-contact">${highlight(p.contact,search)}</div>
-<div class="partner-phone">${highlight(p.phone,search)}</div>
-
-${whatsappHTML}
-
-</div>
-
-<div class="partner-brands">
-${formatBrands(p.brands)}
-</div>
-
-</div>
-
-</td>
-</tr>
-
-`;
-
+multiland.forEach(p=>{
+multilandHTML+=`
+<tr class="row-${getStatusClass(p.status)}">
+<td>${highlight(p.status,search)}</td>
+<td>${highlight(p.company,search)}</td>
+<td>${highlight(p.contact,search)}</td>
+<td>${highlight(p.country,search)}</td>
+<td>${highlight(p.phone,search)}</td>
+<td>${formatBrands(p.brands)}</td>
+</tr>`;
 });
 
 document.getElementById("exportBody").innerHTML=exportHTML;
 document.getElementById("importBody").innerHTML=importHTML;
+document.getElementById("multilandBody").innerHTML=multilandHTML;
 
 }
 
-load();
-setInterval(load,15000);
-
 function copyTable(type){
-
 let table=document.getElementById(type+"Table");
-
-let title=document.createElement("tr");
-let cell=document.createElement("td");
-
-cell.colSpan=table.rows[0].cells.length;
-cell.style.fontWeight="700";
-cell.style.textAlign="left";
-cell.style.background="#0f172a";
-cell.style.color="white";
-
-cell.innerText=type==="export"?"Export Partners":"Import Partners";
-
-title.appendChild(cell);
-
-let tbody=table.querySelector("tbody");
-table.insertBefore(title,tbody);
-
 const range=document.createRange();
 range.selectNode(table);
-
-const selection=window.getSelection();
-selection.removeAllRanges();
-selection.addRange(range);
-
+const sel=window.getSelection();
+sel.removeAllRanges();
+sel.addRange(range);
 document.execCommand("copy");
-
-selection.removeAllRanges();
-
-title.remove();
-
+sel.removeAllRanges();
 }
 
 </script>
