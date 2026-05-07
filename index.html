@@ -9,8 +9,6 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-<script src="https://unpkg.com/html5-qrcode"></script>
-
 <style>
 
 :root{
@@ -156,23 +154,6 @@ background:var(--success);
 color:#fff;
 }
 
-.scan{
-width:100%;
-padding:14px;
-margin-bottom:20px;
-background:#38bdf8;
-border:none;
-border-radius:12px;
-color:white;
-font-weight:600;
-cursor:pointer;
-}
-
-#reader{
-display:none;
-margin-bottom:20px;
-}
-
 #loadingOverlay{
 position:fixed;
 top:0;
@@ -196,72 +177,12 @@ color:white;
 text-align:center;
 }
 
-/* POPUP */
-
-.popup-overlay{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.8);
-display:none;
-align-items:center;
-justify-content:center;
-z-index:10000;
-}
-
-.popup-box{
-background:#1e293b;
-padding:30px;
-border-radius:20px;
-width:90%;
-max-width:380px;
-text-align:center;
-}
-
-.whatsapp-btn{
-width:100%;
-padding:15px;
-margin-top:12px;
-border:none;
-border-radius:14px;
-background:#25D366;
-color:white;
-font-weight:600;
-cursor:pointer;
-}
-
-.close-popup{
-margin-top:15px;
-width:100%;
-padding:14px;
-border:none;
-border-radius:12px;
-background:#334155;
-color:white;
-font-weight:600;
-cursor:pointer;
-}
-
 </style>
 </head>
 
 <body>
 
 <div class="container">
-
-<h1>ISM v1.4</h1>
-
-<button id="scanButton" class="scan" onclick="startScanner()">
-📷 Scan Contact QR / vCard
-</button>
-
-<button id="closeScanner" class="scan" style="display:none">
-Close Scanner
-</button>
-
-<div id="reader"></div>
 
 <div class="step active" id="step1">
 
@@ -281,7 +202,7 @@ Close Scanner
 <input type="email" id="email">
 
 <div class="buttons">
-<button class="next" onclick="nextStep()">Next</button>
+<button type="button" class="next" onclick="nextStep()">Next</button>
 </div>
 
 </div>
@@ -314,8 +235,8 @@ Close Scanner
 </div>
 
 <div class="buttons">
-<button class="back" onclick="prevStep()">Back</button>
-<button class="submit" onclick="submitForm()">Save</button>
+<button type="button" class="back" onclick="prevStep()">Back</button>
+<button type="button" class="submit" onclick="submitForm()">Save</button>
 </div>
 
 </div>
@@ -328,57 +249,18 @@ Saving...
 </div>
 </div>
 
-<!-- WHATSAPP POPUP -->
-
-<div id="whatsappPopup" class="popup-overlay">
-
-<div class="popup-box">
-
-<h2>Contact on WhatsApp</h2>
-
-<button class="whatsapp-btn" onclick="openWhatsAppContact()">
-💬 Write to Contact
-</button>
-
-<button class="whatsapp-btn" onclick="openWhatsAppAttila()">
-💬 Write to Attila
-</button>
-
-<button class="whatsapp-btn" onclick="openWhatsAppNoe()">
-💬 Write to Noé
-</button>
-
-<button class="close-popup" onclick="closePopup()">
-Not now
-</button>
-
-</div>
-
-</div>
-
 <script>
 
-let scanner
 let currentStep = 1
 const totalSteps = 2
 
-const submitButton = document.querySelector(".submit")
 const overlay = document.getElementById("loadingOverlay")
-
-let scanButton = null
-
-document.addEventListener("DOMContentLoaded", () => {
-scanButton = document.getElementById("scanButton")
-})
 
 function nextStep(){
 if(currentStep < totalSteps){
 document.getElementById("step"+currentStep).classList.remove("active")
 currentStep++
 document.getElementById("step"+currentStep).classList.add("active")
-}
-if(currentStep === 2){
-scanButton.style.display = "none"
 }
 }
 
@@ -387,9 +269,6 @@ if(currentStep > 1){
 document.getElementById("step"+currentStep).classList.remove("active")
 currentStep--
 document.getElementById("step"+currentStep).classList.add("active")
-}
-if(currentStep === 1){
-scanButton.style.display = "block"
 }
 }
 
@@ -406,17 +285,22 @@ brand.classList.toggle("active")
 
 async function submitForm(){
 
-overlay.style.display="flex"
+const loaderBox = overlay.querySelector(".loader-box")
 
-const formData=new FormData()
+loaderBox.innerText = "Saving..."
+overlay.style.display = "flex"
 
-formData.append("company",company.value)
-formData.append("country",country.value)
-formData.append("contact",contact.value)
+const formData = new FormData()
+
+formData.append("company", document.getElementById("company").value)
+formData.append("country", document.getElementById("country").value)
+formData.append("contact", document.getElementById("contact").value)
+
+const activeToggle = document.querySelector(".toggle.active")
 
 formData.append(
 "type",
-document.querySelector(".toggle.active")?.textContent || ""
+activeToggle ? activeToggle.textContent : ""
 )
 
 formData.append(
@@ -426,8 +310,8 @@ Array.from(document.querySelectorAll(".brand.active"))
 .join(", ")
 )
 
-formData.append("phone",phone.value)
-formData.append("email",email.value)
+formData.append("phone", document.getElementById("phone").value)
+formData.append("email", document.getElementById("email").value)
 
 await fetch(
 "https://script.google.com/macros/s/AKfycbyJIJ718HHofwJhyyfxJ_qcq1-GcOCNxscZ_sCMsDAThG1vOmTRxWzfs6Vogz30h6nj/exec",
@@ -438,135 +322,11 @@ body:formData
 }
 )
 
-overlay.style.display="none"
-
-document.getElementById("whatsappPopup").style.display="flex"
-
-}
-
-function closePopup(){
-document.getElementById("whatsappPopup").style.display="none"
-location.reload()
-}
-
-function openWhatsAppContact(){
-
-const phone=document.getElementById("phone").value
-const name=document.getElementById("contact").value||""
-
-const cleanPhone=phone.replace(/\D/g,'')
-
-const message=encodeURIComponent(
-"Hello "+name+", nice meeting you at ISM Cologne."
-)
-
-window.open("https://wa.me/"+cleanPhone+"?text="+message,"_blank")
-}
-
-function openWhatsAppAttila(){
-window.open("https://wa.me/36304220151","_blank")
-}
-
-function openWhatsAppNoe(){
-window.open("https://wa.me/36307353208","_blank")
-}
-
-function startScanner(){
-
-if(scanner){
-try{
-scanner.stop()
-}catch(e){}
-}
-
-document.getElementById("reader").style.display = "block"
-
-scanner = new Html5Qrcode("reader")
-
-document.getElementById("closeScanner").style.display = "block"
-
-scanner.start(
-
-{ facingMode:"environment" },
-
-{ fps:10, qrbox:250 },
-
-(decodedText) => {
-
-parseContact(decodedText)
-
-scanner.stop()
-
-document.getElementById("reader").style.display = "none"
-document.getElementById("closeScanner").style.display = "none"
-
-overlay.style.display = "flex"
-overlay.querySelector(".loader-box").innerText = "Contact imported"
+loaderBox.innerText = "Saved"
 
 setTimeout(()=>{
-overlay.style.display = "none"
+location.reload()
 },800)
-
-}
-
-)
-
-}
-
-function parseContact(text){
-
-if(text.includes("BEGIN:VCARD")){
-
-const name = text.match(/FN:(.*)/)?.[1] || ""
-const company = text.match(/ORG:(.*)/)?.[1] || ""
-const phone = text.match(/TEL[^:]*:(.*)/)?.[1] || ""
-const email = text.match(/EMAIL[^:]*:(.*)/)?.[1] || ""
-
-const adr = text.match(/ADR:(.*)/)?.[1] || ""
-const country = adr.split(";")[6] || ""
-
-fillFields(name, company, phone, email)
-
-if(country){
-document.getElementById("country").value = country
-}
-
-return
-
-}
-
-if(text.startsWith("MECARD:")){
-
-const name = text.match(/N:([^;]*)/)?.[1] || ""
-const company = text.match(/ORG:([^;]*)/)?.[1] || ""
-const phone = text.match(/TEL:([^;]*)/)?.[1] || ""
-const email = text.match(/EMAIL:([^;]*)/)?.[1] || ""
-
-fillFields(name, company, phone, email)
-
-return
-
-}
-
-}
-
-function fillFields(name, company, phone, email){
-
-if(name) document.getElementById("contact").value = name
-if(company) document.getElementById("company").value = company
-if(phone) document.getElementById("phone").value = phone
-if(email) document.getElementById("email").value = email
-
-}
-
-document.getElementById("closeScanner").onclick = function(){
-
-if(scanner){
-scanner.stop()
-}
-
-document.getElementById("reader").style.display = "none"
-document.getElementById("closeScanner").style.display = "none"
 
 }
 
