@@ -204,26 +204,6 @@ text-align:center;
 display:none;
 }
 
-@media print{
-
-body{
-background:#fff;
-color:#000;
-padding:0;
-display:block;
-font-family:Inter, Arial, sans-serif;
-}
-
-.container,
-#loadingOverlay{
-display:none !important;
-}
-
-#printArea{
-display:block;
-padding:24px;
-}
-
 .print-header{
 text-align:center;
 border-bottom:2px solid #000;
@@ -277,6 +257,73 @@ word-break:break-word;
 font-size:13px;
 line-height:1.6;
 padding-top:4px;
+}
+
+#printActions{
+display:none;
+margin-top:30px;
+gap:10px;
+}
+
+#printActions button{
+padding:16px;
+border:none;
+border-radius:16px;
+font-weight:600;
+font-size:1rem;
+cursor:pointer;
+}
+
+/* PRINT PREVIEW MODE */
+
+body.print-preview{
+background:#fff;
+color:#000;
+padding:0;
+display:block;
+font-family:Inter, Arial, sans-serif;
+}
+
+body.print-preview .container,
+body.print-preview #loadingOverlay{
+display:none !important;
+}
+
+body.print-preview #printArea{
+display:block;
+max-width:800px;
+margin:0 auto;
+padding:24px;
+}
+
+body.print-preview #printActions{
+display:flex;
+}
+
+/* REAL PRINT */
+
+@media print{
+
+body{
+background:#fff;
+color:#000;
+padding:0;
+display:block;
+font-family:Inter, Arial, sans-serif;
+}
+
+.container,
+#loadingOverlay{
+display:none !important;
+}
+
+#printArea{
+display:block;
+padding:24px;
+}
+
+#printActions{
+display:none !important;
 }
 
 @page{
@@ -414,6 +461,11 @@ margin:14mm;
 <div class="print-brands" id="printBrands"></div>
 </div>
 
+<div id="printActions">
+<button type="button" class="print" onclick="printNow()">Print now</button>
+<button type="button" class="back" onclick="location.reload()">New form</button>
+</div>
+
 </div>
 
 <div id="loadingOverlay">
@@ -486,6 +538,20 @@ selectedBrands.length ? selectedBrands.join(", ") : "-";
 
 }
 
+function showPrintPreview(){
+updatePrintArea();
+document.body.classList.add("print-preview");
+window.scrollTo(0, 0);
+}
+
+function printNow(){
+updatePrintArea();
+
+setTimeout(() => {
+window.print();
+}, 100);
+}
+
 async function submitForm(printAfter = false){
 
 const loaderBox = overlay.querySelector(".loader-box");
@@ -516,6 +582,8 @@ Array.from(document.querySelectorAll(".brand.active"))
 formData.append("phone", document.getElementById("phone").value);
 formData.append("email", document.getElementById("email").value);
 
+try{
+
 await fetch(
 "https://script.google.com/macros/s/AKfycbyJIJ718HHofwJhyyfxJ_qcq1-GcOCNxscZ_sCMsDAThG1vOmTRxWzfs6Vogz30h6nj/exec",
 {
@@ -529,26 +597,24 @@ loaderBox.innerText = "Saved";
 
 if(printAfter){
 
-  updatePrintArea();
-  overlay.style.display = "none";
-
-  setTimeout(() => {
-
-    window.onafterprint = () => {
-      location.reload();
-    };
-    document.body.offsetHeight;
-    window.print();
-
-  }, 300);
+overlay.style.display = "none";
+showPrintPreview();
 
 } else {
 
-  setTimeout(() => {
-    location.reload();
-  }, 800);
+setTimeout(() => {
+location.reload();
+}, 800);
 
 }
+
+} catch(error){
+
+overlay.style.display = "none";
+alert("Saving failed. Please try again.");
+
+}
+
 }
 
 </script>
