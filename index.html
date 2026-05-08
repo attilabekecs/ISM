@@ -529,34 +529,26 @@ loaderBox.innerText = "Saved";
 
 if(printAfter){
 
-setTimeout(() => {
+  updatePrintArea();
+  overlay.style.display = "none";
 
-updatePrintArea();
-overlay.style.display = "none";
+  setTimeout(() => {
 
-let alreadyReset = false;
+    window.onafterprint = () => {
+      location.reload();
+    };
+    document.body.offsetHeight;
+    window.print();
 
-const resetAfterPrint = () => {
-if(alreadyReset) return;
-alreadyReset = true;
-window.removeEventListener("afterprint", resetAfterPrint);
-location.reload();
-};
-
-window.addEventListener("afterprint", resetAfterPrint);
-
-window.print();
-
-}, 500);
+  }, 300);
 
 } else {
 
-setTimeout(() => {
-location.reload();
-}, 800);
+  setTimeout(() => {
+    location.reload();
+  }, 800);
 
 }
-
 }
 
 </script>
