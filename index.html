@@ -21,7 +21,9 @@
 --success:#22c55e;
 }
 
-*{box-sizing:border-box}
+*{
+box-sizing:border-box;
+}
 
 body{
 margin:0;
@@ -58,8 +60,14 @@ display:block;
 }
 
 @keyframes fade{
-from{opacity:0;transform:translateY(8px)}
-to{opacity:1;transform:translateY(0)}
+from{
+opacity:0;
+transform:translateY(8px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
 }
 
 label{
@@ -139,15 +147,19 @@ cursor:pointer;
 font-size:1rem;
 }
 
+button:disabled{
+cursor:default;
+}
+
 .next{
 background:linear-gradient(135deg,var(--accent),var(--accent-soft));
 color:#fff;
 }
 
-.colibri {
-  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
-  color: #fff;
-  margin-bottom: 24px;
+.colibri{
+background:linear-gradient(135deg,#6c5ce7,#a29bfe);
+color:#fff;
+margin-bottom:24px;
 }
 
 .back{
@@ -157,6 +169,11 @@ color:#fff;
 
 .submit{
 background:var(--success);
+color:#fff;
+}
+
+.print{
+background:#f59e0b;
 color:#fff;
 }
 
@@ -183,9 +200,90 @@ color:white;
 text-align:center;
 }
 
-.print{
-background:#f59e0b;
-color:#fff;
+#printArea{
+display:none;
+}
+
+@media print{
+
+body{
+background:#fff;
+color:#000;
+padding:0;
+display:block;
+font-family:Inter, Arial, sans-serif;
+}
+
+.container,
+#loadingOverlay{
+display:none !important;
+}
+
+#printArea{
+display:block;
+padding:24px;
+}
+
+.print-header{
+text-align:center;
+border-bottom:2px solid #000;
+padding-bottom:12px;
+margin-bottom:20px;
+}
+
+.print-header h2{
+margin:0;
+font-size:22px;
+}
+
+.print-header p{
+margin:6px 0 0;
+font-size:13px;
+color:#333;
+}
+
+.print-section{
+margin-bottom:18px;
+page-break-inside:avoid;
+}
+
+.print-section h3{
+font-size:15px;
+margin:0 0 10px;
+border-bottom:1px solid #ccc;
+padding-bottom:5px;
+}
+
+.print-row{
+display:flex;
+justify-content:space-between;
+gap:20px;
+padding:6px 0;
+border-bottom:1px solid #eee;
+font-size:13px;
+}
+
+.print-row span:first-child{
+font-weight:600;
+color:#333;
+}
+
+.print-row span:last-child{
+text-align:right;
+word-break:break-word;
+}
+
+.print-brands{
+font-size:13px;
+line-height:1.6;
+padding-top:4px;
+}
+
+@page{
+size:A4;
+margin:14mm;
+}
+
 }
 
 </style>
@@ -196,7 +294,7 @@ color:#fff;
 <div class="container">
 
 <div class="buttons">
-  <button type="button" class="colibri" disabled>Colibri90 Ltd.</button>
+<button type="button" class="colibri" disabled>Colibri90 Ltd.</button>
 </div>
 
 <div class="step active" id="step1">
@@ -264,6 +362,60 @@ color:#fff;
 
 </div>
 
+<div id="printArea">
+
+<div class="print-header">
+<h2>Colibri90 Ltd.</h2>
+<p>ISM Contact Form</p>
+</div>
+
+<div class="print-section">
+<h3>Company Information</h3>
+
+<div class="print-row">
+<span>Company</span>
+<span id="printCompany"></span>
+</div>
+
+<div class="print-row">
+<span>Country</span>
+<span id="printCountry"></span>
+</div>
+
+<div class="print-row">
+<span>Contact Person</span>
+<span id="printContact"></span>
+</div>
+
+<div class="print-row">
+<span>Phone</span>
+<span id="printPhone"></span>
+</div>
+
+<div class="print-row">
+<span>Email</span>
+<span id="printEmail"></span>
+</div>
+
+</div>
+
+<div class="print-section">
+<h3>Business Type</h3>
+
+<div class="print-row">
+<span>We are</span>
+<span id="printType"></span>
+</div>
+
+</div>
+
+<div class="print-section">
+<h3>Brands of Interest</h3>
+<div class="print-brands" id="printBrands"></div>
+</div>
+
+</div>
+
 <div id="loadingOverlay">
 <div class="loader-box">
 Saving...
@@ -272,67 +424,97 @@ Saving...
 
 <script>
 
-let currentStep = 1
-const totalSteps = 2
+let currentStep = 1;
+const totalSteps = 2;
 
-const overlay = document.getElementById("loadingOverlay")
+const overlay = document.getElementById("loadingOverlay");
 
 function nextStep(){
 if(currentStep < totalSteps){
-document.getElementById("step"+currentStep).classList.remove("active")
-currentStep++
-document.getElementById("step"+currentStep).classList.add("active")
+document.getElementById("step" + currentStep).classList.remove("active");
+currentStep++;
+document.getElementById("step" + currentStep).classList.add("active");
 }
 }
 
 function prevStep(){
 if(currentStep > 1){
-document.getElementById("step"+currentStep).classList.remove("active")
-currentStep--
-document.getElementById("step"+currentStep).classList.add("active")
+document.getElementById("step" + currentStep).classList.remove("active");
+currentStep--;
+document.getElementById("step" + currentStep).classList.add("active");
 }
 }
 
 function selectToggle(el){
-document.querySelectorAll(".toggle").forEach(t => t.classList.remove("active"))
-el.classList.add("active")
+document.querySelectorAll(".toggle").forEach(t => t.classList.remove("active"));
+el.classList.add("active");
 }
 
-document.querySelectorAll(".brand").forEach(brand=>{
-brand.addEventListener("click",()=>{
-brand.classList.toggle("active")
-})
-})
+document.querySelectorAll(".brand").forEach(brand => {
+brand.addEventListener("click", () => {
+brand.classList.toggle("active");
+});
+});
+
+function updatePrintArea(){
+
+document.getElementById("printCompany").innerText =
+document.getElementById("company").value || "-";
+
+document.getElementById("printCountry").innerText =
+document.getElementById("country").value || "-";
+
+document.getElementById("printContact").innerText =
+document.getElementById("contact").value || "-";
+
+document.getElementById("printPhone").innerText =
+document.getElementById("phone").value || "-";
+
+document.getElementById("printEmail").innerText =
+document.getElementById("email").value || "-";
+
+const activeToggle = document.querySelector(".toggle.active");
+
+document.getElementById("printType").innerText =
+activeToggle ? activeToggle.textContent : "-";
+
+const selectedBrands = Array.from(document.querySelectorAll(".brand.active"))
+.map(b => b.textContent);
+
+document.getElementById("printBrands").innerText =
+selectedBrands.length ? selectedBrands.join(", ") : "-";
+
+}
 
 async function submitForm(printAfter = false){
 
-const loaderBox = overlay.querySelector(".loader-box")
+const loaderBox = overlay.querySelector(".loader-box");
 
-loaderBox.innerText = "Saving..."
-overlay.style.display = "flex"
+loaderBox.innerText = "Saving...";
+overlay.style.display = "flex";
 
-const formData = new FormData()
+const formData = new FormData();
 
-formData.append("company", document.getElementById("company").value)
-formData.append("country", document.getElementById("country").value)
-formData.append("contact", document.getElementById("contact").value)
+formData.append("company", document.getElementById("company").value);
+formData.append("country", document.getElementById("country").value);
+formData.append("contact", document.getElementById("contact").value);
 
-const activeToggle = document.querySelector(".toggle.active")
+const activeToggle = document.querySelector(".toggle.active");
 
 formData.append(
 "type",
 activeToggle ? activeToggle.textContent : ""
-)
+);
 
 formData.append(
 "brands",
 Array.from(document.querySelectorAll(".brand.active"))
-.map(b=>b.textContent)
+.map(b => b.textContent)
 .join(", ")
-)
+);
 
-formData.append("phone", document.getElementById("phone").value)
-formData.append("email", document.getElementById("email").value)
+formData.append("phone", document.getElementById("phone").value);
+formData.append("email", document.getElementById("email").value);
 
 await fetch(
 "https://script.google.com/macros/s/AKfycbyJIJ718HHofwJhyyfxJ_qcq1-GcOCNxscZ_sCMsDAThG1vOmTRxWzfs6Vogz30h6nj/exec",
@@ -341,31 +523,37 @@ method:"POST",
 mode:"no-cors",
 body:formData
 }
-)
+);
 
-loaderBox.innerText = "Saved"
+loaderBox.innerText = "Saved";
 
 if(printAfter){
 
-setTimeout(()=>{
-overlay.style.display = "none"
+setTimeout(() => {
+
+updatePrintArea();
+overlay.style.display = "none";
+
+let alreadyReset = false;
 
 const resetAfterPrint = () => {
-window.removeEventListener("afterprint", resetAfterPrint)
-location.reload()
-}
+if(alreadyReset) return;
+alreadyReset = true;
+window.removeEventListener("afterprint", resetAfterPrint);
+location.reload();
+};
 
-window.addEventListener("afterprint", resetAfterPrint)
+window.addEventListener("afterprint", resetAfterPrint);
 
-window.print()
+window.print();
 
-},500)
+}, 500);
 
 } else {
 
-setTimeout(()=>{
-location.reload()
-},800)
+setTimeout(() => {
+location.reload();
+}, 800);
 
 }
 
